@@ -1,0 +1,137 @@
+package com.pemmob.geprekrejo.ui
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.pemmob.geprekrejo.data.repository.AuthRepository
+import com.pemmob.geprekrejo.data.repository.DashboardRepository
+import com.pemmob.geprekrejo.data.repository.StaffRepository
+import com.pemmob.geprekrejo.network.RetrofitClient
+import com.pemmob.geprekrejo.ui.dashboard.DashboardScreen
+import com.pemmob.geprekrejo.ui.dashboard.DashboardViewModel
+import com.pemmob.geprekrejo.ui.staff.StaffScreen
+import com.pemmob.geprekrejo.ui.staff.StaffViewModel
+
+@Composable
+fun MainScreen(
+    authRepo: AuthRepository,
+    onLogout: () -> Unit
+) {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // ViewModel Instances
+    val dashboardViewModel: DashboardViewModel = viewModel {
+        DashboardViewModel(DashboardRepository(RetrofitClient.apiService))
+    }
+    val staffViewModel: StaffViewModel = viewModel {
+        StaffViewModel(StaffRepository(RetrofitClient.apiService))
+    }
+
+    var showLogoutConfirm by remember { mutableStateOf(false) }
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
+                NavigationBarItem(
+                    selected = currentRoute == "dashboard",
+                    onClick = {
+                        if (currentRoute != "dashboard") {
+                            navController.navigate("dashboard") {
+                                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    },
+                    icon = { Icon(Icons.Default.Dashboard, "Dashboard") },
+                    label = { Text("Dashboard") },
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                        selectedIconColor = Color(0xFFBC000A),
+                        selectedTextColor = Color(0xFFBC000A)
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = currentRoute == "staff",
+                    onClick = {
+                        if (currentRoute != "staff") {
+                            navController.navigate("staff") {
+                                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    },
+                    icon = { Icon(Icons.Default.People, "Staf & Shift") },
+                    label = { Text("Staf & Shift") },
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                        selectedIconColor = Color(0xFFBC000A),
+                        selectedTextColor = Color(0xFFBC000A)
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { showLogoutConfirm = true },
+                    icon = { Icon(Icons.Default.Logout, "Keluar", tint = MaterialTheme.colorScheme.error) },
+                    label = { Text("Keluar", color = MaterialTheme.colorScheme.error) }
+                )
+            }
+        }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "dashboard",
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable("dashboard") {
+                DashboardScreen(viewModel = dashboardViewModel)
+            }
+            composable("staff") {
+                StaffScreen(viewModel = staffViewModel)
+            }
+        }
+    }
+
+    if (showLogoutConfirm) {
+        AlertDialog(
+            onDismissRequest = { showLogoutConfirm = false },
+            title = { Text("Konfirmasi Keluar") },
+            text = { Text("Apakah Anda yakin ingin keluar dari aplikasi?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLogoutConfirm = false
+                        onLogout()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Keluar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutConfirm = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network Security Config — Mengizinkan cleartext (HTTP) traffic
+    ke IP lokal development (Laragon). Tanpa ini, Android 9+ akan
+    memblokir semua koneksi non-HTTPS.
+
+    PENTING: Untuk production, hapus atau batasi domain ini
+    agar hanya menggunakan HTTPS.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">192.168.100.10</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>

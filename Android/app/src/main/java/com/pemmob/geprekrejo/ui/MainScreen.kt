@@ -22,6 +22,8 @@ import com.pemmob.geprekrejo.ui.dashboard.DashboardScreen
 import com.pemmob.geprekrejo.ui.dashboard.DashboardViewModel
 import com.pemmob.geprekrejo.ui.staff.StaffScreen
 import com.pemmob.geprekrejo.ui.staff.StaffViewModel
+import com.pemmob.geprekrejo.ui.stock.StockScreen
+import com.pemmob.geprekrejo.ui.stock.StockViewModel
 
 @Composable
 fun MainScreen(
@@ -39,61 +41,77 @@ fun MainScreen(
     val staffViewModel: StaffViewModel = viewModel {
         StaffViewModel(StaffRepository(RetrofitClient.apiService))
     }
+    val stockViewModel: StockViewModel = viewModel {
+        StockViewModel(RetrofitClient.apiService)
+    }
 
     var showLogoutConfirm by remember { mutableStateOf(false) }
 
+    // Memaksa reload data saat pengguna berhasil login kembali
+    // agar error 401 kadaluarsa tidak ter-cache di ViewModel
+    LaunchedEffect(Unit) {
+        dashboardViewModel.loadDashboard()
+        staffViewModel.loadStaffList()
+        stockViewModel.loadStock()
+    }
+
+    // Halaman stock tidak menampilkan bottom bar
+    val showBottomBar = currentRoute != "stock"
+
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ) {
-                NavigationBarItem(
-                    selected = currentRoute == "dashboard",
-                    onClick = {
-                        if (currentRoute != "dashboard") {
-                            navController.navigate("dashboard") {
-                                popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
+            if (showBottomBar) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    NavigationBarItem(
+                        selected = currentRoute == "dashboard",
+                        onClick = {
+                            if (currentRoute != "dashboard") {
+                                navController.navigate("dashboard") {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
-                        }
-                    },
-                    icon = { Icon(Icons.Default.Dashboard, "Dashboard") },
-                    label = { Text("Dashboard") },
-                    colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
-                        selectedIconColor = Color(0xFFBC000A),
-                        selectedTextColor = Color(0xFFBC000A)
+                        },
+                        icon = { Icon(Icons.Default.Dashboard, "Dashboard") },
+                        label = { Text("Dashboard") },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                            selectedIconColor = Color(0xFFBC000A),
+                            selectedTextColor = Color(0xFFBC000A)
+                        )
                     )
-                )
 
-                NavigationBarItem(
-                    selected = currentRoute == "staff",
-                    onClick = {
-                        if (currentRoute != "staff") {
-                            navController.navigate("staff") {
-                                popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
+                    NavigationBarItem(
+                        selected = currentRoute == "staff",
+                        onClick = {
+                            if (currentRoute != "staff") {
+                                navController.navigate("staff") {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
-                        }
-                    },
-                    icon = { Icon(Icons.Default.People, "Staf & Shift") },
-                    label = { Text("Staf & Shift") },
-                    colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
-                        selectedIconColor = Color(0xFFBC000A),
-                        selectedTextColor = Color(0xFFBC000A)
+                        },
+                        icon = { Icon(Icons.Default.People, "Staf & Shift") },
+                        label = { Text("Staf & Shift") },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                            selectedIconColor = Color(0xFFBC000A),
+                            selectedTextColor = Color(0xFFBC000A)
+                        )
                     )
-                )
 
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { showLogoutConfirm = true },
-                    icon = { Icon(Icons.Default.Logout, "Keluar", tint = MaterialTheme.colorScheme.error) },
-                    label = { Text("Keluar", color = MaterialTheme.colorScheme.error) }
-                )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { showLogoutConfirm = true },
+                        icon = { Icon(Icons.Default.Logout, "Keluar", tint = MaterialTheme.colorScheme.error) },
+                        label = { Text("Keluar", color = MaterialTheme.colorScheme.error) }
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -103,10 +121,23 @@ fun MainScreen(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("dashboard") {
-                DashboardScreen(viewModel = dashboardViewModel)
+                DashboardScreen(
+                    viewModel = dashboardViewModel,
+                    onNavigateToStock = {
+                        navController.navigate("stock") {
+                            launchSingleTop = true
+                        }
+                    }
+                )
             }
             composable("staff") {
                 StaffScreen(viewModel = staffViewModel)
+            }
+            composable("stock") {
+                StockScreen(
+                    viewModel = stockViewModel,
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
     }

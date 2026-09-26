@@ -167,3 +167,21 @@ data class ShiftRequest(
     val position: String,
     val notes: String? = null
 )
+
+// ── Stock ──────────────────────────────────────────────────────────────────────
+
+data class StockItem(
+    val id: Int,
+    val name: String,
+    val unit: String,
+    @SerializedName("current_stock") val currentStock: Double,
+    @SerializedName("minimum_stock") val minimumStock: Double,
+    @SerializedName("unit_cost")     val unitCost: Double,
+    @SerializedName("is_critical")   val isCritical: Boolean
+)
+
+data class StockListData(
+    val items: List<StockItem>,
+    val total: Int,
+    @SerializedName("critical_count") val criticalCount: Int
+)

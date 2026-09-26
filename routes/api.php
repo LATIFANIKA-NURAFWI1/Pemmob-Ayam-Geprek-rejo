@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\StaffController;
+use App\Http\Controllers\Api\Admin\StockController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -102,6 +103,10 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/{shift}', [StaffController::class, 'shiftDestroy'])
                     ->name('destroy');        // DELETE /api/v1/admin/shifts/{id}
             });
+
+            // ── Stok Bahan Baku ───────────────────────────────────────────────
+            Route::get('/stock', [StockController::class, 'index'])
+                ->name('stock.index');       // GET /api/v1/admin/stock
         });
     });
 });

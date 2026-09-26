@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             RecipeSeeder::class,
             MemberSeeder::class,
             VoucherSeeder::class,
+            OrderSeeder::class,
         ]);
     }
 }

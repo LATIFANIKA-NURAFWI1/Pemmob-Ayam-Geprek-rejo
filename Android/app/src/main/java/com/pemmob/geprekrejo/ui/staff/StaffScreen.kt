@@ -1,6 +1,7 @@
 package com.pemmob.geprekrejo.ui.staff
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +23,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pemmob.geprekrejo.data.model.ActiveStaffItem
 import com.pemmob.geprekrejo.data.model.ShiftItem
 import com.pemmob.geprekrejo.data.model.StaffItem
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 private val BrandRed = Color(0xFFBC000A)
 
@@ -256,6 +261,7 @@ private fun StaffFormSheet(state: StaffUiState, viewModel: StaffViewModel) {
             OutlinedTextField(f.password, { viewModel.onStaffFormChange { s -> s.copy(password = it) } },
                 Modifier.fillMaxWidth(),
                 label = { Text(if (f.id != null) "Password Baru (kosongkan = tidak diubah)" else "Password *") },
+                supportingText = { Text("Min. 8 karakter") },
                 visualTransformation = PasswordVisualTransformation(), singleLine = true)
 
             RoleDropdown(f.role) { viewModel.onStaffFormChange { s -> s.copy(role = it) } }
@@ -300,6 +306,12 @@ private fun ShiftFormSheet(state: StaffUiState, viewModel: StaffViewModel) {
     val f = state.shiftForm
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    // Date picker state
+    var showDatePicker by remember { mutableStateOf(false) }
+    // Time picker state
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }
+
     ModalBottomSheet(onDismissRequest = viewModel::dismissShiftForm, sheetState = sheetState) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -308,14 +320,71 @@ private fun ShiftFormSheet(state: StaffUiState, viewModel: StaffViewModel) {
 
             StaffDropdown(state.activeStaffList, f.userId) { viewModel.onShiftFormChange { s -> s.copy(userId = it) } }
 
-            OutlinedTextField(f.shiftDate, { viewModel.onShiftFormChange { s -> s.copy(shiftDate = it) } },
-                Modifier.fillMaxWidth(), label = { Text("Tanggal (YYYY-MM-DD) *") }, singleLine = true)
+            // Tanggal — klik untuk buka DatePicker
+            OutlinedTextField(
+                value = f.shiftDate,
+                onValueChange = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true },
+                label = { Text("Tanggal *") },
+                placeholder = { Text("Tap untuk pilih tanggal") },
+                readOnly = true,
+                enabled = false,
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                trailingIcon = { Icon(Icons.Default.CalendarToday, null) }
+            )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(f.startTime, { viewModel.onShiftFormChange { s -> s.copy(startTime = it) } },
-                    Modifier.weight(1f), label = { Text("Mulai (HH:mm)") }, singleLine = true)
-                OutlinedTextField(f.endTime, { viewModel.onShiftFormChange { s -> s.copy(endTime = it) } },
-                    Modifier.weight(1f), label = { Text("Selesai (HH:mm)") }, singleLine = true)
+                // Jam Mulai — klik untuk buka TimePicker
+                OutlinedTextField(
+                    value = f.startTime,
+                    onValueChange = {},
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { showStartTimePicker = true },
+                    label = { Text("Mulai") },
+                    placeholder = { Text("HH:mm") },
+                    readOnly = true,
+                    enabled = false,
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    trailingIcon = { Icon(Icons.Default.Schedule, null) }
+                )
+                // Jam Selesai — klik untuk buka TimePicker
+                OutlinedTextField(
+                    value = f.endTime,
+                    onValueChange = {},
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { showEndTimePicker = true },
+                    label = { Text("Selesai") },
+                    placeholder = { Text("HH:mm") },
+                    readOnly = true,
+                    enabled = false,
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    trailingIcon = { Icon(Icons.Default.Schedule, null) }
+                )
             }
 
             PositionDropdown(f.position) { viewModel.onShiftFormChange { s -> s.copy(position = it) } }
@@ -330,6 +399,84 @@ private fun ShiftFormSheet(state: StaffUiState, viewModel: StaffViewModel) {
             }
         }
     }
+
+    // ── DatePicker Dialog ──────────────────────────────────────────────────────
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState()
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        sdf.timeZone = TimeZone.getTimeZone("UTC")
+                        val formatted = sdf.format(millis)
+                        viewModel.onShiftFormChange { s -> s.copy(shiftDate = formatted) }
+                    }
+                    showDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Batal") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    // ── TimePicker Dialog — Jam Mulai ─────────────────────────────────────────
+    if (showStartTimePicker) {
+        TimePickerDialogWrapper(
+            onConfirm = { hour, minute ->
+                val formatted = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+                viewModel.onShiftFormChange { s -> s.copy(startTime = formatted) }
+                showStartTimePicker = false
+            },
+            onDismiss = { showStartTimePicker = false }
+        )
+    }
+
+    // ── TimePicker Dialog — Jam Selesai ───────────────────────────────────────
+    if (showEndTimePicker) {
+        TimePickerDialogWrapper(
+            onConfirm = { hour, minute ->
+                val formatted = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+                viewModel.onShiftFormChange { s -> s.copy(endTime = formatted) }
+                showEndTimePicker = false
+            },
+            onDismiss = { showEndTimePicker = false }
+        )
+    }
+}
+
+/**
+ * Composable wrapper untuk Material3 TimePicker yang dibungkus dalam AlertDialog.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimePickerDialogWrapper(
+    onConfirm: (hour: Int, minute: Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val timePickerState = rememberTimePickerState(is24Hour = true)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Pilih Jam") },
+        text = {
+            Box(Modifier.fillMaxWidth(), Alignment.Center) {
+                TimePicker(state = timePickerState)
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirm(timePickerState.hour, timePickerState.minute)
+            }) { Text("OK") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Batal") }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

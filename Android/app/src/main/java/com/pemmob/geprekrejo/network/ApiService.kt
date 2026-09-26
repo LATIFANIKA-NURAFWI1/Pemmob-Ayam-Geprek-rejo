@@ -64,4 +64,10 @@ interface ApiService {
 
     @DELETE("admin/shifts/{id}")
     suspend fun deleteShift(@Path("id") id: Int): Response<ApiResponse<Unit>>
+
+    // ── Stock ─────────────────────────────────────────────────────────────────
+    @GET("admin/stock")
+    suspend fun getStockList(
+        @Query("search") search: String? = null
+    ): Response<ApiResponse<StockListData>>
 }

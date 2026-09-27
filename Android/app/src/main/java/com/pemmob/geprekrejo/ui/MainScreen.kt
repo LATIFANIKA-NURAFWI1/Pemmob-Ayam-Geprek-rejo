@@ -24,6 +24,8 @@ import com.pemmob.geprekrejo.ui.staff.StaffScreen
 import com.pemmob.geprekrejo.ui.staff.StaffViewModel
 import com.pemmob.geprekrejo.ui.stock.StockScreen
 import com.pemmob.geprekrejo.ui.stock.StockViewModel
+import com.pemmob.geprekrejo.ui.kasir.KasirScreen
+import com.pemmob.geprekrejo.ui.kasir.KasirViewModel
 
 @Composable
 fun MainScreen(
@@ -44,8 +46,11 @@ fun MainScreen(
     val stockViewModel: StockViewModel = viewModel {
         StockViewModel(RetrofitClient.apiService)
     }
+    val kasirViewModel: KasirViewModel = viewModel()
 
     var showLogoutConfirm by remember { mutableStateOf(false) }
+    
+    val userRole = authRepo.currentUserRole
 
     // Memaksa reload data saat pengguna berhasil login kembali
     // agar error 401 kadaluarsa tidak ter-cache di ViewModel
@@ -56,7 +61,10 @@ fun MainScreen(
     }
 
     // Halaman stock tidak menampilkan bottom bar
-    val showBottomBar = currentRoute != "stock"
+    val showBottomBar = currentRoute != "stock" && userRole == "owner"
+
+    // Tentukan start destination berdasarkan role
+    val startDest = if (userRole == "kasir") "kasir_dashboard" else "dashboard"
 
     Scaffold(
         bottomBar = {
@@ -117,9 +125,12 @@ fun MainScreen(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "dashboard",
+            startDestination = startDest,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable("kasir_dashboard") {
+                KasirScreen(viewModel = kasirViewModel, onLogout = { showLogoutConfirm = true })
+            }
             composable("dashboard") {
                 DashboardScreen(
                     viewModel = dashboardViewModel,

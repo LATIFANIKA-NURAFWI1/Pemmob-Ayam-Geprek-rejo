@@ -24,8 +24,7 @@ import com.pemmob.geprekrejo.ui.staff.StaffScreen
 import com.pemmob.geprekrejo.ui.staff.StaffViewModel
 import com.pemmob.geprekrejo.ui.stock.StockScreen
 import com.pemmob.geprekrejo.ui.stock.StockViewModel
-import com.pemmob.geprekrejo.ui.kasir.KasirScreen
-import com.pemmob.geprekrejo.ui.kasir.KasirViewModel
+
 
 @Composable
 fun MainScreen(
@@ -46,7 +45,7 @@ fun MainScreen(
     val stockViewModel: StockViewModel = viewModel {
         StockViewModel(RetrofitClient.apiService)
     }
-    val kasirViewModel: KasirViewModel = viewModel()
+
 
     var showLogoutConfirm by remember { mutableStateOf(false) }
     
@@ -63,8 +62,8 @@ fun MainScreen(
     // Halaman stock tidak menampilkan bottom bar
     val showBottomBar = currentRoute != "stock" && userRole == "owner"
 
-    // Tentukan start destination berdasarkan role
-    val startDest = if (userRole == "kasir") "kasir_dashboard" else "dashboard"
+    // Tentukan start destination
+    val startDest = "dashboard"
 
     Scaffold(
         bottomBar = {
@@ -128,9 +127,6 @@ fun MainScreen(
             startDestination = startDest,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("kasir_dashboard") {
-                KasirScreen(viewModel = kasirViewModel, onLogout = { showLogoutConfirm = true })
-            }
             composable("dashboard") {
                 DashboardScreen(
                     viewModel = dashboardViewModel,

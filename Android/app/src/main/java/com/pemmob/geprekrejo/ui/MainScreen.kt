@@ -25,6 +25,7 @@ import com.pemmob.geprekrejo.ui.staff.StaffViewModel
 import com.pemmob.geprekrejo.ui.stock.StockScreen
 import com.pemmob.geprekrejo.ui.stock.StockViewModel
 
+
 @Composable
 fun MainScreen(
     authRepo: AuthRepository,
@@ -45,7 +46,10 @@ fun MainScreen(
         StockViewModel(RetrofitClient.apiService)
     }
 
+
     var showLogoutConfirm by remember { mutableStateOf(false) }
+    
+    val userRole = authRepo.currentUserRole
 
     // Memaksa reload data saat pengguna berhasil login kembali
     // agar error 401 kadaluarsa tidak ter-cache di ViewModel
@@ -56,7 +60,10 @@ fun MainScreen(
     }
 
     // Halaman stock tidak menampilkan bottom bar
-    val showBottomBar = currentRoute != "stock"
+    val showBottomBar = currentRoute != "stock" && userRole == "owner"
+
+    // Tentukan start destination
+    val startDest = "dashboard"
 
     Scaffold(
         bottomBar = {
@@ -117,7 +124,7 @@ fun MainScreen(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "dashboard",
+            startDestination = startDest,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("dashboard") {

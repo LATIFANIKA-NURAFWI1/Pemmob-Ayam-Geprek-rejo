@@ -286,7 +286,7 @@ private fun StaffFormSheet(state: StaffUiState, viewModel: StaffViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RoleDropdown(selected: String, onSelect: (String) -> Unit) {
-    val roles = listOf("kasir" to "Kasir", "kds" to "KDS Dapur", "inventory" to "Inventory")
+    val roles = listOf("owner" to "Owner", "kds" to "KDS Dapur", "inventory" to "Inventory")
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded, { expanded = it }) {
         OutlinedTextField(roles.find { it.first == selected }?.second ?: selected, {},
@@ -499,7 +499,7 @@ private fun StaffDropdown(list: List<ActiveStaffItem>, selectedId: Int, onSelect
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PositionDropdown(selected: String, onSelect: (String) -> Unit) {
-    val positions = listOf("kasir" to "Kasir", "inventory" to "Inventory", "dapur" to "Dapur")
+    val positions = listOf("inventory" to "Inventory", "dapur" to "Dapur")
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded, { expanded = it }) {
         OutlinedTextField(positions.find { it.first == selected }?.second ?: selected, {},

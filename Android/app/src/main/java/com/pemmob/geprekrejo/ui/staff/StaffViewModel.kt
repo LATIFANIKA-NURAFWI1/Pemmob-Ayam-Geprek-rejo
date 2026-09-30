@@ -191,7 +191,7 @@ data class StaffFormState(
     val name: String   = "",
     val email: String  = "",
     val password: String = "",
-    val role: String   = "kasir",
+    val role: String   = "owner",
     val isActive: Boolean = true
 )
 
@@ -201,7 +201,7 @@ data class ShiftFormState(
     val shiftDate: String = "",
     val startTime: String = "",
     val endTime: String   = "",
-    val position: String  = "kasir",
+    val position: String  = "inventory",
     val notes: String     = ""
 )
 

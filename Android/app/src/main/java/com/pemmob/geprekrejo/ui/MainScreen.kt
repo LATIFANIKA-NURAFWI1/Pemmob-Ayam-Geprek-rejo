@@ -2,6 +2,7 @@ package com.pemmob.geprekrejo.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.People
@@ -16,10 +17,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.pemmob.geprekrejo.data.repository.AuthRepository
 import com.pemmob.geprekrejo.data.repository.DashboardRepository
+import com.pemmob.geprekrejo.data.repository.FinanceRepository
 import com.pemmob.geprekrejo.data.repository.StaffRepository
 import com.pemmob.geprekrejo.network.RetrofitClient
 import com.pemmob.geprekrejo.ui.dashboard.DashboardScreen
 import com.pemmob.geprekrejo.ui.dashboard.DashboardViewModel
+import com.pemmob.geprekrejo.ui.finance.FinanceScreen
+import com.pemmob.geprekrejo.ui.finance.FinanceViewModel
 import com.pemmob.geprekrejo.ui.staff.StaffScreen
 import com.pemmob.geprekrejo.ui.staff.StaffViewModel
 import com.pemmob.geprekrejo.ui.stock.StockScreen
@@ -39,6 +43,9 @@ fun MainScreen(
     val dashboardViewModel: DashboardViewModel = viewModel {
         DashboardViewModel(DashboardRepository(RetrofitClient.apiService))
     }
+    val financeViewModel: FinanceViewModel = viewModel {
+        FinanceViewModel(FinanceRepository(RetrofitClient.apiService))
+    }
     val staffViewModel: StaffViewModel = viewModel {
         StaffViewModel(StaffRepository(RetrofitClient.apiService))
     }
@@ -55,6 +62,8 @@ fun MainScreen(
     // agar error 401 kadaluarsa tidak ter-cache di ViewModel
     LaunchedEffect(Unit) {
         dashboardViewModel.loadDashboard()
+        financeViewModel.loadReport()
+        financeViewModel.loadExpenses()
         staffViewModel.loadStaffList()
         stockViewModel.loadStock()
     }
@@ -85,6 +94,26 @@ fun MainScreen(
                         },
                         icon = { Icon(Icons.Default.Dashboard, "Dashboard") },
                         label = { Text("Dashboard") },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                            selectedIconColor = Color(0xFFBC000A),
+                            selectedTextColor = Color(0xFFBC000A)
+                        )
+                    )
+
+                    NavigationBarItem(
+                        selected = currentRoute == "finance",
+                        onClick = {
+                            if (currentRoute != "finance") {
+                                navController.navigate("finance") {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = { Icon(Icons.Default.AccountBalanceWallet, "Keuangan") },
+                        label = { Text("Keuangan") },
                         colors = NavigationBarItemDefaults.colors(
                             indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
                             selectedIconColor = Color(0xFFBC000A),
@@ -136,6 +165,9 @@ fun MainScreen(
                         }
                     }
                 )
+            }
+            composable("finance") {
+                FinanceScreen(viewModel = financeViewModel)
             }
             composable("staff") {
                 StaffScreen(viewModel = staffViewModel)

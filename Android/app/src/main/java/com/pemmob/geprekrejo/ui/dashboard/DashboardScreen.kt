@@ -34,7 +34,8 @@ private val BrandRedBg = Color(0x1FBC000A)
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
-    onNavigateToStock: () -> Unit = {}
+    onNavigateToStock: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -57,6 +58,9 @@ fun DashboardScreen(
                 actions = {
                     IconButton(onClick = viewModel::loadDashboard) {
                         Icon(Icons.Default.Refresh, "Refresh")
+                    }
+                    IconButton(onClick = onLogoutClick) {
+                        Icon(Icons.Default.Logout, "Keluar", tint = MaterialTheme.colorScheme.error)
                     }
                 }
             )

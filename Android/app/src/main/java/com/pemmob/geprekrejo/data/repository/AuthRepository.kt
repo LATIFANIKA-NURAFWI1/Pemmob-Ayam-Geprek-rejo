@@ -29,7 +29,18 @@ class AuthRepository(
                     Result.Error(body?.message ?: "Login gagal.")
                 }
             } else {
-                Result.Error("Email atau password salah.")
+                val errorMsg = try {
+                    val errString = response.errorBody()?.string()
+                    if (!errString.isNullOrBlank()) {
+                        val json = org.json.JSONObject(errString)
+                        json.optString("message", "Email atau password salah.")
+                    } else {
+                        "Email atau password salah."
+                    }
+                } catch (e: Exception) {
+                    "Email atau password salah."
+                }
+                Result.Error(errorMsg)
             }
         } catch (e: Exception) {
             Result.Error(e.message ?: "Tidak dapat terhubung ke server.")

@@ -22,7 +22,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// ── Auth endpoint (tidak butuh token) ────────────────────────────────────────
+// ── Fallback Auth routes (jika client memanggil /api/login langsung) ────────
+Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+// ── Auth endpoint (v1) ───────────────────────────────────────────────────────
 Route::prefix('v1')->group(function () {
 
     // Endpoint login menggunakan Sanctum token — dihandle Fortify/Sanctum

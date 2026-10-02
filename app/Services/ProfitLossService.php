@@ -217,23 +217,28 @@ class ProfitLossService
                 'order_details.menu_item_name,
                  SUM(order_details.quantity) as total_qty,
                  SUM(order_details.subtotal) as total_revenue,
-                 SUM(order_details.hpp_snapshot * order_details.quantity) as total_hpp,
-                 SUM(order_details.subtotal - (order_details.hpp_snapshot * order_details.quantity)) as gross_profit'
+                 SUM(order_details.hpp_snapshot * order_details.quantity) as total_hpp'
             )
             ->groupBy('order_details.menu_item_name')
             ->orderByDesc('total_revenue')
             ->limit($limit)
             ->get()
-            ->map(fn ($row) => [
-                'menu_item_name' => $row->menu_item_name,
-                'total_qty'      => (int) $row->total_qty,
-                'total_revenue'  => round((float) $row->total_revenue, 2),
-                'total_hpp'      => round((float) $row->total_hpp, 2),
-                'gross_profit'   => round((float) $row->gross_profit, 2),
-                'margin_pct'     => $row->total_revenue > 0
-                    ? round(($row->gross_profit / $row->total_revenue) * 100, 2)
-                    : 0.0,
-            ])
+            ->map(function ($row) {
+                $revenue = (float) $row->total_revenue;
+                $hpp = (float) $row->total_hpp;
+                $grossProfit = $revenue - $hpp;
+
+                return [
+                    'menu_item_name' => $row->menu_item_name,
+                    'total_qty'      => (int) $row->total_qty,
+                    'total_revenue'  => round($revenue, 2),
+                    'total_hpp'      => round($hpp, 2),
+                    'gross_profit'   => round($grossProfit, 2),
+                    'margin_pct'     => $revenue > 0
+                        ? round(($grossProfit / $revenue) * 100, 2)
+                        : 0.0,
+                ];
+            })
             ->toArray();
     }
 

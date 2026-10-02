@@ -2,9 +2,12 @@ package com.pemmob.geprekrejo.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -16,15 +19,21 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.pemmob.geprekrejo.data.repository.AuthRepository
 import com.pemmob.geprekrejo.data.repository.DashboardRepository
+import com.pemmob.geprekrejo.data.repository.FinanceRepository
 import com.pemmob.geprekrejo.data.repository.StaffRepository
 import com.pemmob.geprekrejo.network.RetrofitClient
 import com.pemmob.geprekrejo.ui.dashboard.DashboardScreen
 import com.pemmob.geprekrejo.ui.dashboard.DashboardViewModel
+import com.pemmob.geprekrejo.ui.finance.FinanceScreen
+import com.pemmob.geprekrejo.ui.finance.FinanceViewModel
+import com.pemmob.geprekrejo.ui.menu.MenuFormScreen
+import com.pemmob.geprekrejo.ui.menu.MenuFormViewModel
+import com.pemmob.geprekrejo.ui.menu.MenuListScreen
+import com.pemmob.geprekrejo.ui.menu.MenuViewModel
 import com.pemmob.geprekrejo.ui.staff.StaffScreen
 import com.pemmob.geprekrejo.ui.staff.StaffViewModel
 import com.pemmob.geprekrejo.ui.stock.StockScreen
 import com.pemmob.geprekrejo.ui.stock.StockViewModel
-
 
 @Composable
 fun MainScreen(
@@ -39,6 +48,11 @@ fun MainScreen(
     val dashboardViewModel: DashboardViewModel = viewModel {
         DashboardViewModel(DashboardRepository(RetrofitClient.apiService))
     }
+    val menuViewModel: MenuViewModel = viewModel()
+    val menuFormViewModel: MenuFormViewModel = viewModel()
+    val financeViewModel: FinanceViewModel = viewModel {
+        FinanceViewModel(FinanceRepository(RetrofitClient.apiService))
+    }
     val staffViewModel: StaffViewModel = viewModel {
         StaffViewModel(StaffRepository(RetrofitClient.apiService))
     }
@@ -46,21 +60,22 @@ fun MainScreen(
         StockViewModel(RetrofitClient.apiService)
     }
 
-
     var showLogoutConfirm by remember { mutableStateOf(false) }
     
     val userRole = authRepo.currentUserRole
 
     // Memaksa reload data saat pengguna berhasil login kembali
-    // agar error 401 kadaluarsa tidak ter-cache di ViewModel
     LaunchedEffect(Unit) {
         dashboardViewModel.loadDashboard()
+        menuViewModel.loadData()
+        financeViewModel.loadReport()
+        financeViewModel.loadExpenses()
         staffViewModel.loadStaffList()
         stockViewModel.loadStock()
     }
 
-    // Halaman stock tidak menampilkan bottom bar
-    val showBottomBar = currentRoute != "stock" && userRole == "owner"
+    // Form menu tidak menampilkan bottom bar
+    val showBottomBar = currentRoute != "menu_form" && userRole == "owner"
 
     // Tentukan start destination
     val startDest = "dashboard"
@@ -93,6 +108,66 @@ fun MainScreen(
                     )
 
                     NavigationBarItem(
+                        selected = currentRoute == "menu",
+                        onClick = {
+                            if (currentRoute != "menu") {
+                                navController.navigate("menu") {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = { Icon(Icons.Default.RestaurantMenu, "Menu") },
+                        label = { Text("Menu") },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                            selectedIconColor = Color(0xFFBC000A),
+                            selectedTextColor = Color(0xFFBC000A)
+                        )
+                    )
+
+                    NavigationBarItem(
+                        selected = currentRoute == "stock",
+                        onClick = {
+                            if (currentRoute != "stock") {
+                                navController.navigate("stock") {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = { Icon(Icons.Default.Inventory2, "Stok") },
+                        label = { Text("Stok") },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                            selectedIconColor = Color(0xFFBC000A),
+                            selectedTextColor = Color(0xFFBC000A)
+                        )
+                    )
+
+                    NavigationBarItem(
+                        selected = currentRoute == "finance",
+                        onClick = {
+                            if (currentRoute != "finance") {
+                                navController.navigate("finance") {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = { Icon(Icons.Default.AccountBalanceWallet, "Keuangan") },
+                        label = { Text("Keuangan") },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                            selectedIconColor = Color(0xFFBC000A),
+                            selectedTextColor = Color(0xFFBC000A)
+                        )
+                    )
+
+                    NavigationBarItem(
                         selected = currentRoute == "staff",
                         onClick = {
                             if (currentRoute != "staff") {
@@ -103,20 +178,13 @@ fun MainScreen(
                                 }
                             }
                         },
-                        icon = { Icon(Icons.Default.People, "Staf & Shift") },
-                        label = { Text("Staf & Shift") },
+                        icon = { Icon(Icons.Default.People, "Staf") },
+                        label = { Text("Staf") },
                         colors = NavigationBarItemDefaults.colors(
                             indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
                             selectedIconColor = Color(0xFFBC000A),
                             selectedTextColor = Color(0xFFBC000A)
                         )
-                    )
-
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = { showLogoutConfirm = true },
-                        icon = { Icon(Icons.Default.Logout, "Keluar", tint = MaterialTheme.colorScheme.error) },
-                        label = { Text("Keluar", color = MaterialTheme.colorScheme.error) }
                     )
                 }
             }
@@ -134,8 +202,35 @@ fun MainScreen(
                         navController.navigate("stock") {
                             launchSingleTop = true
                         }
+                    },
+                    onLogoutClick = { showLogoutConfirm = true }
+                )
+            }
+            composable("menu") {
+                MenuListScreen(
+                    viewModel = menuViewModel,
+                    onNavigateToAddMenu = {
+                        menuFormViewModel.resetForCreate()
+                        navController.navigate("menu_form")
+                    },
+                    onNavigateToEditMenu = { item ->
+                        menuFormViewModel.initForEdit(item)
+                        navController.navigate("menu_form")
                     }
                 )
+            }
+            composable("menu_form") {
+                MenuFormScreen(
+                    viewModel = menuFormViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onSaveComplete = { savedItem ->
+                        menuViewModel.saveMenu(savedItem)
+                        navController.popBackStack()
+                    }
+                )
+            }
+            composable("finance") {
+                FinanceScreen(viewModel = financeViewModel)
             }
             composable("staff") {
                 StaffScreen(viewModel = staffViewModel)

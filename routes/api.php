@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\DashboardController;
+use App\Http\Controllers\Api\Admin\ExpenseController;
+use App\Http\Controllers\Api\Admin\ReportController;
 use App\Http\Controllers\Api\Admin\StaffController;
 use App\Http\Controllers\Api\Admin\StockController;
 use Illuminate\Http\Request;
@@ -20,7 +22,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// ── Auth endpoint (tidak butuh token) ────────────────────────────────────────
+// ── Fallback Auth routes (jika client memanggil /api/login langsung) ────────
+Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+// ── Auth endpoint (v1) ───────────────────────────────────────────────────────
 Route::prefix('v1')->group(function () {
 
     // Endpoint login menggunakan Sanctum token — dihandle Fortify/Sanctum
@@ -107,6 +113,26 @@ Route::prefix('v1')->group(function () {
             // ── Stok Bahan Baku ───────────────────────────────────────────────
             Route::get('/stock', [StockController::class, 'index'])
                 ->name('stock.index');       // GET /api/v1/admin/stock
+
+            // ── Laporan Finansial (Laba / Rugi) ──────────────────────────────
+            Route::prefix('reports')->name('reports.')->group(function () {
+                Route::get('/profit-loss', [ReportController::class, 'profitLoss'])
+                    ->name('profit-loss');   // GET /api/v1/admin/reports/profit-loss
+            });
+
+            // ── Manajemen Pengeluaran Operasional ─────────────────────────────
+            Route::prefix('expenses')->name('expenses.')->group(function () {
+                Route::get('/', [ExpenseController::class, 'index'])
+                    ->name('index');          // GET /api/v1/admin/expenses
+                Route::get('/summary', [ExpenseController::class, 'summary'])
+                    ->name('summary');        // GET /api/v1/admin/expenses/summary
+                Route::post('/', [ExpenseController::class, 'store'])
+                    ->name('store');          // POST /api/v1/admin/expenses
+                Route::put('/{id}', [ExpenseController::class, 'update'])
+                    ->name('update');         // PUT /api/v1/admin/expenses/{id}
+                Route::delete('/{id}', [ExpenseController::class, 'destroy'])
+                    ->name('destroy');        // DELETE /api/v1/admin/expenses/{id}
+            });
         });
     });
 });

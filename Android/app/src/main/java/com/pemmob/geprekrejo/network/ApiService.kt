@@ -70,4 +70,42 @@ interface ApiService {
     suspend fun getStockList(
         @Query("search") search: String? = null
     ): Response<ApiResponse<StockListData>>
+
+    // ── Laporan Finansial (Laba / Rugi) ───────────────────────────────────────
+    @GET("admin/reports/profit-loss")
+    suspend fun getProfitLossReport(
+        @Query("preset") preset: String? = null,
+        @Query("from") from: String? = null,
+        @Query("to") to: String? = null
+    ): Response<ProfitLossResponse>
+
+    // ── Pengeluaran Operasional ───────────────────────────────────────────────
+    @GET("admin/expenses")
+    suspend fun getExpenseList(
+        @Query("month") month: String? = null,
+        @Query("search") search: String? = null,
+        @Query("category") category: String? = null,
+        @Query("page") page: Int = 1
+    ): Response<ExpenseListResponse>
+
+    @POST("admin/expenses")
+    suspend fun createExpense(
+        @Body request: ExpenseRequest
+    ): Response<ExpenseResponse>
+
+    @PUT("admin/expenses/{id}")
+    suspend fun updateExpense(
+        @Path("id") id: Int,
+        @Body request: ExpenseRequest
+    ): Response<ExpenseResponse>
+
+    @DELETE("admin/expenses/{id}")
+    suspend fun deleteExpense(
+        @Path("id") id: Int
+    ): Response<ApiResponse<Unit>>
+
+    @GET("admin/expenses/summary")
+    suspend fun getExpenseSummary(
+        @Query("month") month: String? = null
+    ): Response<ApiResponse<ExpenseSummaryData>>
 }

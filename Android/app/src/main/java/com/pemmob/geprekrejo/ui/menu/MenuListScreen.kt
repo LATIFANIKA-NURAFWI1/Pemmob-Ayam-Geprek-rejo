@@ -53,6 +53,15 @@ fun MenuListScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToAddMenu,
+                containerColor = BrandRed,
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Tambah Menu")
+            }
+        },
         containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier
     ) { paddingValues ->
@@ -63,7 +72,7 @@ fun MenuListScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // ── 1. Header (Judul & Tombol Tambah Menu) ─────────────────────────
+            // ── 1. Header (Judul & Subtitle) ─────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -80,30 +89,6 @@ fun MenuListScreen(
                         text = "Kelola daftar menu, harga, dan ketersediaan stok.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Tombol "+ Tambah"
-                Button(
-                    onClick = onNavigateToAddMenu,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandRed),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Tambah Menu",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Tambah",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 13.sp
                     )
                 }
             }

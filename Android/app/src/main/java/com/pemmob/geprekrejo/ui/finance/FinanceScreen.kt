@@ -1,14 +1,18 @@
 package com.pemmob.geprekrejo.ui.finance
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -18,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pemmob.geprekrejo.data.model.*
+import com.pemmob.geprekrejo.network.RetrofitClient
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -39,6 +45,7 @@ private val BrandBlue = Color(0xFF1976D2)
 fun FinanceScreen(viewModel: FinanceViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(state.successMessage) {
         state.successMessage?.let {
@@ -68,6 +75,16 @@ fun FinanceScreen(viewModel: FinanceViewModel) {
                     }
                 },
                 actions = {
+                    if (state.selectedTab == 0) {
+                        IconButton(onClick = {
+                            val preset = state.reportData?.preset ?: "bulan_ini"
+                            val url = RetrofitClient.BASE_URL + "admin/reports/export-pdf?preset=" + preset
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            context.startActivity(intent)
+                        }) {
+                            Icon(Icons.Default.Print, "Cetak PDF")
+                        }
+                    }
                     IconButton(onClick = {
                         if (state.selectedTab == 0) viewModel.loadReport() else viewModel.loadExpenses()
                     }) {
@@ -311,7 +328,9 @@ private fun ProfitLossTabContent(
                     Spacer(Modifier.height(8.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(2.dp)
                     ) {
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             state.reportData.topMenus.forEachIndexed { idx, menu ->
@@ -324,16 +343,20 @@ private fun ProfitLossTabContent(
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.weight(1f)
                                     ) {
+                                        val isTop3 = idx < 3
+                                        val circleBg = if (isTop3) BrandRed else Color(0xFFFFF8E1)
+                                        val textColor = if (isTop3) Color.White else Color(0xFFF59E0B)
+                                        
                                         Box(
                                             modifier = Modifier
                                                 .size(24.dp)
                                                 .clip(CircleShape)
-                                                .background(BrandRed.copy(alpha = 0.15f)),
+                                                .background(circleBg),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
                                                 "${idx + 1}",
-                                                color = BrandRed,
+                                                color = textColor,
                                                 fontSize = 12.sp,
                                                 fontWeight = FontWeight.Bold
                                             )
@@ -441,7 +464,9 @@ private fun MetricCard(
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(Modifier.padding(14.dp)) {
             Row(
@@ -729,6 +754,7 @@ private fun ExpenseFormDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {

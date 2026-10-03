@@ -35,6 +35,11 @@ import com.pemmob.geprekrejo.ui.staff.StaffViewModel
 import com.pemmob.geprekrejo.ui.stock.StockScreen
 import com.pemmob.geprekrejo.ui.stock.StockViewModel
 
+import com.pemmob.geprekrejo.ui.order.OrderViewModel
+import com.pemmob.geprekrejo.data.repository.OrderRepository
+import com.pemmob.geprekrejo.ui.order.OrderHistoryScreen
+import androidx.compose.material.icons.filled.Receipt
+
 @Composable
 fun MainScreen(
     authRepo: AuthRepository,
@@ -59,6 +64,9 @@ fun MainScreen(
     val stockViewModel: StockViewModel = viewModel {
         StockViewModel(RetrofitClient.apiService)
     }
+    val orderViewModel: OrderViewModel = viewModel {
+        OrderViewModel(OrderRepository(RetrofitClient.apiService))
+    }
 
     var showLogoutConfirm by remember { mutableStateOf(false) }
     
@@ -72,6 +80,7 @@ fun MainScreen(
         financeViewModel.loadExpenses()
         staffViewModel.loadStaffList()
         stockViewModel.loadStock()
+        orderViewModel.loadData()
     }
 
     // Form menu tidak menampilkan bottom bar
@@ -120,6 +129,26 @@ fun MainScreen(
                         },
                         icon = { Icon(Icons.Default.RestaurantMenu, "Menu") },
                         label = { Text("Menu") },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                            selectedIconColor = Color(0xFFBC000A),
+                            selectedTextColor = Color(0xFFBC000A)
+                        )
+                    )
+
+                    NavigationBarItem(
+                        selected = currentRoute == "order",
+                        onClick = {
+                            if (currentRoute != "order") {
+                                navController.navigate("order") {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = { Icon(Icons.Default.Receipt, "Pesanan") },
+                        label = { Text("Pesanan") },
                         colors = NavigationBarItemDefaults.colors(
                             indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
                             selectedIconColor = Color(0xFFBC000A),
@@ -240,6 +269,9 @@ fun MainScreen(
                     viewModel = stockViewModel,
                     onBack = { navController.popBackStack() }
                 )
+            }
+            composable("order") {
+                OrderHistoryScreen(viewModel = orderViewModel)
             }
         }
     }

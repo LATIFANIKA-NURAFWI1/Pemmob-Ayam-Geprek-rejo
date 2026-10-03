@@ -59,10 +59,10 @@ class StaffViewModel(private val repository: StaffRepository) : ViewModel() {
         }
     }
 
-    private fun loadActiveStaffList() {
+    fun loadActiveStaffList() {
         viewModelScope.launch {
-            if (repository.getActiveStaffList() is Result.Success) {
-                val r = repository.getActiveStaffList() as Result.Success
+            val r = repository.getActiveStaffList()
+            if (r is Result.Success) {
                 _uiState.update { it.copy(activeStaffList = r.data) }
             }
         }
@@ -91,6 +91,7 @@ class StaffViewModel(private val repository: StaffRepository) : ViewModel() {
                     _uiState.update { it.copy(isSaving = false, showStaffForm = false,
                         success = "Staf \"${r.data.name}\" berhasil ${if (f.id != null) "diperbarui" else "ditambahkan"}.") }
                     loadStaffList()
+                    loadActiveStaffList()
                 }
                 is Result.Error -> _uiState.update { it.copy(isSaving = false, error = r.message) }
                 else -> {}
@@ -101,9 +102,12 @@ class StaffViewModel(private val repository: StaffRepository) : ViewModel() {
     fun toggleActive(id: Int) {
         viewModelScope.launch {
             when (val r = repository.toggleStaffActive(id)) {
-                is Result.Success -> _uiState.update { s ->
-                    s.copy(staffList = s.staffList.map { if (it.id == id) it.copy(isActive = r.data) else it },
-                        success = "Status staf berhasil diubah.")
+                is Result.Success -> {
+                    _uiState.update { s ->
+                        s.copy(staffList = s.staffList.map { if (it.id == id) it.copy(isActive = r.data) else it },
+                            success = "Status staf berhasil diubah.")
+                    }
+                    loadActiveStaffList()
                 }
                 is Result.Error -> _uiState.update { it.copy(error = r.message) }
                 else -> {}
@@ -191,7 +195,7 @@ data class StaffFormState(
     val name: String   = "",
     val email: String  = "",
     val password: String = "",
-    val role: String   = "owner",
+    val role: String   = "kasir",
     val isActive: Boolean = true
 )
 
@@ -201,7 +205,7 @@ data class ShiftFormState(
     val shiftDate: String = "",
     val startTime: String = "",
     val endTime: String   = "",
-    val position: String  = "inventory",
+    val position: String  = "kasir",
     val notes: String     = ""
 )
 

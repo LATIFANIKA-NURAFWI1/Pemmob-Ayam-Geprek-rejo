@@ -62,6 +62,7 @@ fun StockFormDialog(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
                 .wrapContentHeight()
+                .imePadding()
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // ── Header Modal ───────────────────────────────────────────────

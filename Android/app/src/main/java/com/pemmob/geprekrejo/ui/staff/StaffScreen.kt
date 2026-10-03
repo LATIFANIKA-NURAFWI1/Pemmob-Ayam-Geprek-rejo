@@ -5,8 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -145,6 +147,7 @@ private fun StaffTabContent(state: StaffUiState, searchQuery: String, viewModel:
 @Composable
 private fun StaffCard(staff: StaffItem, onEdit: () -> Unit, onDelete: () -> Unit, onToggle: () -> Unit) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(2.dp)) {
         Column(Modifier.padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
@@ -215,6 +218,7 @@ private fun ShiftTabContent(state: StaffUiState, viewModel: StaffViewModel) {
 @Composable
 private fun ShiftCard(shift: ShiftItem, onEdit: () -> Unit, onDelete: () -> Unit) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(2.dp)) {
         Row(Modifier.padding(16.dp).fillMaxWidth(),
             Arrangement.SpaceBetween, Alignment.CenterVertically) {
@@ -249,7 +253,7 @@ private fun StaffFormSheet(state: StaffUiState, viewModel: StaffViewModel) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(onDismissRequest = viewModel::dismissStaffForm, sheetState = sheetState) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 40.dp),
+        Column(Modifier.fillMaxWidth().imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(if (f.id != null) "Edit Staf" else "Tambah Staf Baru",
                 style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -286,7 +290,7 @@ private fun StaffFormSheet(state: StaffUiState, viewModel: StaffViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RoleDropdown(selected: String, onSelect: (String) -> Unit) {
-    val roles = listOf("owner" to "Owner", "kds" to "KDS Dapur", "inventory" to "Inventory")
+    val roles = listOf("kasir" to "Kasir", "kds" to "KDS Dapur", "inventory" to "Inventory")
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded, { expanded = it }) {
         OutlinedTextField(roles.find { it.first == selected }?.second ?: selected, {},
@@ -313,7 +317,7 @@ private fun ShiftFormSheet(state: StaffUiState, viewModel: StaffViewModel) {
     var showEndTimePicker by remember { mutableStateOf(false) }
 
     ModalBottomSheet(onDismissRequest = viewModel::dismissShiftForm, sheetState = sheetState) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 40.dp),
+        Column(Modifier.fillMaxWidth().imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(if (f.id != null) "Edit Shift" else "Tambah Shift",
                 style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -499,7 +503,7 @@ private fun StaffDropdown(list: List<ActiveStaffItem>, selectedId: Int, onSelect
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PositionDropdown(selected: String, onSelect: (String) -> Unit) {
-    val positions = listOf("inventory" to "Inventory", "dapur" to "Dapur")
+    val positions = listOf("kasir" to "Kasir", "inventory" to "Inventory", "dapur" to "Dapur")
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded, { expanded = it }) {
         OutlinedTextField(positions.find { it.first == selected }?.second ?: selected, {},

@@ -107,6 +107,15 @@ fun StockScreen(
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = viewModel::openCreateDialog,
+                containerColor = BrandRed,
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Tambah Bahan")
+            }
+        },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
@@ -116,35 +125,7 @@ fun StockScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // ── 1. Tombol Aksi Tambah Bahan & Header Action ────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = viewModel::openCreateDialog,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandRed),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Tambah Bahan",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Tambah Bahan",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 13.sp
-                    )
-                }
-            }
-
-            // ── 2. Cards Statistik Ringkasan (Total, Aman, Rendah) ──────────────
+            // ── 1. Cards Statistik Ringkasan (Total, Aman, Rendah) ──────────────
             StockSummaryCards(
                 totalCount = state.totalCount,
                 safeCount = state.safeStockCount,

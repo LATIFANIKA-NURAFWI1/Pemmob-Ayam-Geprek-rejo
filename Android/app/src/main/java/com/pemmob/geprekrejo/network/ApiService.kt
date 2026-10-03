@@ -108,4 +108,14 @@ interface ApiService {
     suspend fun getExpenseSummary(
         @Query("month") month: String? = null
     ): Response<ApiResponse<ExpenseSummaryData>>
+
+    // ── Riwayat Pesanan ───────────────────────────────────────────────────────
+    @GET("admin/order-history")
+    suspend fun getOrderHistory(
+        @Query("mode") mode: String,
+        @Query("search") search: String? = null,
+        @Query("tanggal") tanggal: String? = null,
+        @Query("bulan") bulan: String? = null,
+        @Query("page") page: Int = 1
+    ): Response<com.pemmob.geprekrejo.data.model.OrderHistoryResponse>
 }

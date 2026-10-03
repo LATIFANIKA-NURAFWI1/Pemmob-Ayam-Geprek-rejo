@@ -75,4 +75,49 @@ class ReportController extends Controller
             ],
         ]);
     }
+
+    /**
+     * GET /api/v1/admin/reports/export-pdf
+     */
+    public function exportPdf(Request $request)
+    {
+        $preset = $request->query('preset', 'bulan_ini');
+
+        switch ($preset) {
+            case 'hari_ini':
+                $from = Carbon::today()->toDateString();
+                $to   = Carbon::today()->toDateString();
+                break;
+            case 'minggu_ini':
+                $from = Carbon::now()->startOfWeek()->toDateString();
+                $to   = Carbon::now()->endOfWeek()->toDateString();
+                break;
+            case 'tahun_ini':
+                $from = Carbon::now()->startOfYear()->toDateString();
+                $to   = Carbon::now()->endOfYear()->toDateString();
+                break;
+            case 'custom':
+                $from = $request->query('from', Carbon::now()->startOfMonth()->toDateString());
+                $to   = $request->query('to', Carbon::now()->toDateString());
+                break;
+            case 'bulan_ini':
+            default:
+                $preset = 'bulan_ini';
+                $from = Carbon::now()->startOfMonth()->toDateString();
+                $to   = Carbon::now()->endOfMonth()->toDateString();
+                break;
+        }
+
+        $report = $this->profitLossService->calculate($from, $to);
+        $topMenus = $this->profitLossService->topMenuItems($from, $to, 10);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.profit-loss-pdf', [
+            'dari' => $from,
+            'sampai' => $to,
+            'report' => $report,
+            'topItems' => $topMenus
+        ]);
+
+        return $pdf->stream('Laporan_Laba_Rugi_' . $from . '_to_' . $to . '.pdf');
+    }
 }

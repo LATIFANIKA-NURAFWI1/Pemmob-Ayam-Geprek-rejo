@@ -29,6 +29,10 @@ Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout
 // ── Auth endpoint (v1) ───────────────────────────────────────────────────────
 Route::prefix('v1')->group(function () {
 
+    // Public export PDF route
+    Route::get('/admin/reports/export-pdf', [\App\Http\Controllers\Api\Admin\ReportController::class, 'exportPdf'])
+        ->name('api.admin.reports.export-pdf');
+
     // Endpoint login menggunakan Sanctum token — dihandle Fortify/Sanctum
     Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login'])
         ->name('api.login');
@@ -133,6 +137,10 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/{id}', [ExpenseController::class, 'destroy'])
                     ->name('destroy');        // DELETE /api/v1/admin/expenses/{id}
             });
+
+            // ── Riwayat Pesanan ──────────────────────────────────────────────────
+            Route::get('/order-history', [\App\Http\Controllers\Api\Admin\OrderHistoryController::class, 'index'])
+                ->name('order-history');     // GET /api/v1/admin/order-history
         });
     });
 });

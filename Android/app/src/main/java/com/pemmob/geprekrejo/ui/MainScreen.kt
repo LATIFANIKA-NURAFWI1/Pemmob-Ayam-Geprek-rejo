@@ -1,6 +1,24 @@
 package com.pemmob.geprekrejo.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
+import kotlinx.coroutines.launch
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Dashboard
@@ -12,6 +30,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import com.pemmob.geprekrejo.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -89,14 +109,46 @@ fun MainScreen(
     // Tentukan start destination
     val startDest = "dashboard"
 
-    Scaffold(
-        bottomBar = {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
             if (showBottomBar) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
+                ModalDrawerSheet(
+                    modifier = Modifier.width(280.dp),
+                    drawerContainerColor = MaterialTheme.colorScheme.surface
                 ) {
-                    NavigationBarItem(
+                    Spacer(Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.mipmap.ic_launcher),
+                            contentDescription = "Logo Geprek Rejo",
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Column {
+                            Text(
+                                "Geprek Rejo",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFBC000A)
+                            )
+                            Text(
+                                "Sistem Manajemen",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    HorizontalDivider()
+                    Spacer(Modifier.height(8.dp))
+
+                    NavigationDrawerItem(
                         selected = currentRoute == "dashboard",
                         onClick = {
                             if (currentRoute != "dashboard") {
@@ -106,17 +158,19 @@ fun MainScreen(
                                     restoreState = true
                                 }
                             }
+                            scope.launch { drawerState.close() }
                         },
                         icon = { Icon(Icons.Default.Dashboard, "Dashboard") },
                         label = { Text("Dashboard") },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color(0xFFBC000A).copy(alpha = 0.15f),
                             selectedIconColor = Color(0xFFBC000A),
                             selectedTextColor = Color(0xFFBC000A)
                         )
                     )
 
-                    NavigationBarItem(
+                    NavigationDrawerItem(
                         selected = currentRoute == "menu",
                         onClick = {
                             if (currentRoute != "menu") {
@@ -126,17 +180,19 @@ fun MainScreen(
                                     restoreState = true
                                 }
                             }
+                            scope.launch { drawerState.close() }
                         },
                         icon = { Icon(Icons.Default.RestaurantMenu, "Menu") },
                         label = { Text("Menu") },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color(0xFFBC000A).copy(alpha = 0.15f),
                             selectedIconColor = Color(0xFFBC000A),
                             selectedTextColor = Color(0xFFBC000A)
                         )
                     )
 
-                    NavigationBarItem(
+                    NavigationDrawerItem(
                         selected = currentRoute == "order",
                         onClick = {
                             if (currentRoute != "order") {
@@ -146,17 +202,19 @@ fun MainScreen(
                                     restoreState = true
                                 }
                             }
+                            scope.launch { drawerState.close() }
                         },
                         icon = { Icon(Icons.Default.Receipt, "Pesanan") },
                         label = { Text("Pesanan") },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color(0xFFBC000A).copy(alpha = 0.15f),
                             selectedIconColor = Color(0xFFBC000A),
                             selectedTextColor = Color(0xFFBC000A)
                         )
                     )
 
-                    NavigationBarItem(
+                    NavigationDrawerItem(
                         selected = currentRoute == "stock",
                         onClick = {
                             if (currentRoute != "stock") {
@@ -166,17 +224,19 @@ fun MainScreen(
                                     restoreState = true
                                 }
                             }
+                            scope.launch { drawerState.close() }
                         },
                         icon = { Icon(Icons.Default.Inventory2, "Stok") },
                         label = { Text("Stok") },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color(0xFFBC000A).copy(alpha = 0.15f),
                             selectedIconColor = Color(0xFFBC000A),
                             selectedTextColor = Color(0xFFBC000A)
                         )
                     )
 
-                    NavigationBarItem(
+                    NavigationDrawerItem(
                         selected = currentRoute == "finance",
                         onClick = {
                             if (currentRoute != "finance") {
@@ -186,17 +246,19 @@ fun MainScreen(
                                     restoreState = true
                                 }
                             }
+                            scope.launch { drawerState.close() }
                         },
                         icon = { Icon(Icons.Default.AccountBalanceWallet, "Keuangan") },
                         label = { Text("Keuangan") },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color(0xFFBC000A).copy(alpha = 0.15f),
                             selectedIconColor = Color(0xFFBC000A),
                             selectedTextColor = Color(0xFFBC000A)
                         )
                     )
 
-                    NavigationBarItem(
+                    NavigationDrawerItem(
                         selected = currentRoute == "staff",
                         onClick = {
                             if (currentRoute != "staff") {
@@ -206,11 +268,13 @@ fun MainScreen(
                                     restoreState = true
                                 }
                             }
+                            scope.launch { drawerState.close() }
                         },
                         icon = { Icon(Icons.Default.People, "Staf") },
                         label = { Text("Staf") },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color(0xFFBC000A).copy(alpha = 0.15f),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color(0xFFBC000A).copy(alpha = 0.15f),
                             selectedIconColor = Color(0xFFBC000A),
                             selectedTextColor = Color(0xFFBC000A)
                         )
@@ -218,7 +282,8 @@ fun MainScreen(
                 }
             }
         }
-    ) { innerPadding ->
+    ) {
+        Scaffold { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = startDest,
@@ -232,7 +297,8 @@ fun MainScreen(
                             launchSingleTop = true
                         }
                     },
-                    onLogoutClick = { showLogoutConfirm = true }
+                    onLogoutClick = { showLogoutConfirm = true },
+                    onOpenDrawer = { scope.launch { drawerState.open() } }
                 )
             }
             composable("menu") {
@@ -245,7 +311,8 @@ fun MainScreen(
                     onNavigateToEditMenu = { item ->
                         menuFormViewModel.initForEdit(item)
                         navController.navigate("menu_form")
-                    }
+                    },
+                    onOpenDrawer = { scope.launch { drawerState.open() } }
                 )
             }
             composable("menu_form") {
@@ -259,21 +326,32 @@ fun MainScreen(
                 )
             }
             composable("finance") {
-                FinanceScreen(viewModel = financeViewModel)
+                FinanceScreen(
+                    viewModel = financeViewModel,
+                    onOpenDrawer = { scope.launch { drawerState.open() } }
+                )
             }
             composable("staff") {
-                StaffScreen(viewModel = staffViewModel)
+                StaffScreen(
+                    viewModel = staffViewModel,
+                    onOpenDrawer = { scope.launch { drawerState.open() } }
+                )
             }
             composable("stock") {
                 StockScreen(
                     viewModel = stockViewModel,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onOpenDrawer = { scope.launch { drawerState.open() } }
                 )
             }
             composable("order") {
-                OrderHistoryScreen(viewModel = orderViewModel)
+                OrderHistoryScreen(
+                    viewModel = orderViewModel,
+                    onOpenDrawer = { scope.launch { drawerState.open() } }
+                )
             }
         }
+    }
     }
 
     if (showLogoutConfirm) {

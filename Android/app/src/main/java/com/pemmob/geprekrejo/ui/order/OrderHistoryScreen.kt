@@ -35,7 +35,10 @@ private val BrandBlue = Color(0xFF1976D2)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderHistoryScreen(viewModel: OrderViewModel) {
+fun OrderHistoryScreen(
+    viewModel: OrderViewModel,
+    onOpenDrawer: () -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -58,6 +61,11 @@ fun OrderHistoryScreen(viewModel: OrderViewModel) {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Default.Menu, "Menu")
                     }
                 },
                 actions = {
@@ -150,10 +158,10 @@ fun OrderHistoryScreen(viewModel: OrderViewModel) {
                             ).show()
                         }
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).height(56.dp)
                 ) {
                     Row(
-                        Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                        Modifier.padding(horizontal = 12.dp).fillMaxHeight(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -162,17 +170,15 @@ fun OrderHistoryScreen(viewModel: OrderViewModel) {
                     }
                 }
 
-                if (state.mode == "harian") {
-                    OutlinedTextField(
-                        value = state.search,
-                        onValueChange = viewModel::setSearch,
-                        placeholder = { Text("Cari no. pesanan...") },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                        modifier = Modifier.weight(1.5f),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
+                OutlinedTextField(
+                    value = state.search,
+                    onValueChange = viewModel::setSearch,
+                    placeholder = { Text("Cari nomor pesanan...") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    modifier = Modifier.weight(1.5f).height(56.dp),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp)
+                )
             }
 
             // Summary Cards

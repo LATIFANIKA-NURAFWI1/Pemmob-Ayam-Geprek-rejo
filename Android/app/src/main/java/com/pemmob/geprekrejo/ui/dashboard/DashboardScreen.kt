@@ -36,7 +36,8 @@ private val BrandRedBg = Color(0x1FBC000A)
 fun DashboardScreen(
     viewModel: DashboardViewModel,
     onNavigateToStock: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    onOpenDrawer: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -54,6 +55,11 @@ fun DashboardScreen(
                         Text("Ringkasan hari ini",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Default.Menu, "Menu")
                     }
                 },
                 actions = {
@@ -103,10 +109,6 @@ private fun DashboardContent(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         item {
-            Text("Selamat datang di Sistem Self-Order Geprek Rejo \uD83D\uDC4B", 
-                style = MaterialTheme.typography.bodyMedium, 
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(16.dp))
             StatsGrid(stats = data.stats, onNavigateToStock = onNavigateToStock)
         }
         item {
@@ -178,7 +180,7 @@ private fun StatCard(
     label: String, value: String, subtitle: String? = null, isAmount: Boolean = false,
     valueColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
-    Card(modifier = modifier, shape = RoundedCornerShape(16.dp),
+    Card(modifier = modifier.height(160.dp), shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(2.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

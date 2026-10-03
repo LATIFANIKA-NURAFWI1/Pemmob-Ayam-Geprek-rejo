@@ -34,7 +34,10 @@ private val BrandRed = Color(0xFFBC000A)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StaffScreen(viewModel: StaffViewModel) {
+fun StaffScreen(
+    viewModel: StaffViewModel,
+    onOpenDrawer: () -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -53,7 +56,12 @@ fun StaffScreen(viewModel: StaffViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Manajemen Staf & Shift", fontWeight = FontWeight.Bold) }
+                title = { Text("Manajemen Staf & Shift", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Default.Menu, "Menu")
+                    }
+                }
             )
         },
         floatingActionButton = {

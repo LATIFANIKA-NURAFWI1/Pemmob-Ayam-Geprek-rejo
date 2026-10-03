@@ -42,7 +42,10 @@ private val BrandBlue = Color(0xFF1976D2)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FinanceScreen(viewModel: FinanceViewModel) {
+fun FinanceScreen(
+    viewModel: FinanceViewModel,
+    onOpenDrawer: () -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -72,6 +75,11 @@ fun FinanceScreen(viewModel: FinanceViewModel) {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Default.Menu, "Menu")
                     }
                 },
                 actions = {

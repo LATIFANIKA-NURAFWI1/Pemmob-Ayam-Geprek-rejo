@@ -9,12 +9,12 @@ import java.util.concurrent.TimeUnit
 /**
  * RetrofitClient — singleton yang menyediakan instance ApiService.
  *
- * BASE_URL diatur ke IP Address Wi-Fi laptop (192.168.100.10) agar
+ * BASE_URL diatur ke IP Address Wi-Fi laptop (ipconfig di cmd) agar
  * bisa diakses dari HP fisik yang tersambung ke Wi-Fi yang sama.
  */
 object RetrofitClient {
 
-    const val BASE_URL = "http://192.168.100.10:8000/api/v1/"
+    const val BASE_URL = "http://192.168.1.11:8000/api/v1/"
 
 
 

@@ -81,7 +81,7 @@ fun StockFilterBar(
             ),
             modifier = Modifier
                 .weight(1f)
-                .height(48.dp)
+                .height(56.dp)
         )
 
         // ── Dropdown Filter Status ───────────────────────────────────────────
@@ -98,7 +98,7 @@ fun StockFilterBar(
                     MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                 ),
                 contentPadding = PaddingValues(horizontal = 12.dp),
-                modifier = Modifier.height(48.dp)
+                modifier = Modifier.height(56.dp)
             ) {
                 Text(
                     text = selectedStatus.label,

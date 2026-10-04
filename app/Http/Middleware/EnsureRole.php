@@ -19,7 +19,7 @@ class EnsureRole
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (! $request->user()) {
-            return redirect()->route('login');
+            abort(401, 'Unauthenticated.');
         }
 
         // N9.1: Blokir staf yang dinonaktifkan oleh Owner.
@@ -29,22 +29,10 @@ class EnsureRole
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')
-                ->withErrors(['email' => 'Akun Anda telah dinonaktifkan. Hubungi Owner.']);
+            abort(403, 'Akun Anda telah dinonaktifkan. Hubungi Owner.');
         }
 
         if (! in_array($request->user()->role, $roles)) {
-            // Redirect ke halaman yang sesuai dengan role mereka
-            $user = $request->user();
-
-            if ($user->isKds()) {
-                return redirect()->route('kds.display');
-            }
-
-            if ($user->isKasir()) {
-                return redirect()->route('kasir.dashboard');
-            }
-
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 

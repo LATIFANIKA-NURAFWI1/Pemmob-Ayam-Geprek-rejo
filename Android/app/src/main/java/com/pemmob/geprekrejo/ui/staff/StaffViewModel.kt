@@ -61,9 +61,10 @@ class StaffViewModel(private val repository: StaffRepository) : ViewModel() {
 
     fun loadActiveStaffList() {
         viewModelScope.launch {
-            val r = repository.getActiveStaffList()
-            if (r is Result.Success) {
-                _uiState.update { it.copy(activeStaffList = r.data) }
+            when (val r = repository.getActiveStaffList()) {
+                is Result.Success -> _uiState.update { it.copy(activeStaffList = r.data) }
+                is Result.Error -> _uiState.update { it.copy(error = r.message) }
+                else -> {}
             }
         }
     }

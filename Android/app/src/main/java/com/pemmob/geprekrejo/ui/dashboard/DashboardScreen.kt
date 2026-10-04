@@ -36,6 +36,10 @@ private val BrandRedBg = Color(0x1FBC000A)
 fun DashboardScreen(
     viewModel: DashboardViewModel,
     onNavigateToStock: () -> Unit = {},
+    onNavigateToMenu: () -> Unit = {},
+    onNavigateToOrder: () -> Unit = {},
+    onNavigateToFinance: () -> Unit = {},
+    onNavigateToStaff: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     onOpenDrawer: () -> Unit = {}
 ) {
@@ -50,12 +54,11 @@ fun DashboardScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text("Dashboard", fontWeight = FontWeight.Bold)
-                        Text("Ringkasan hari ini",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    Text(
+                        text = "Dashboard",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onOpenDrawer) {
@@ -81,6 +84,10 @@ fun DashboardScreen(
             state.data != null -> DashboardContent(
                 data = state.data!!,
                 onNavigateToStock = onNavigateToStock,
+                onNavigateToMenu = onNavigateToMenu,
+                onNavigateToOrder = onNavigateToOrder,
+                onNavigateToFinance = onNavigateToFinance,
+                onNavigateToStaff = onNavigateToStaff,
                 modifier = Modifier.padding(pad)
             )
             else -> Box(Modifier.fillMaxSize().padding(pad), Alignment.Center) {
@@ -101,6 +108,10 @@ fun DashboardScreen(
 private fun DashboardContent(
     data: DashboardData,
     onNavigateToStock: () -> Unit,
+    onNavigateToMenu: () -> Unit,
+    onNavigateToOrder: () -> Unit,
+    onNavigateToFinance: () -> Unit,
+    onNavigateToStaff: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -109,7 +120,14 @@ private fun DashboardContent(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         item {
-            StatsGrid(stats = data.stats, onNavigateToStock = onNavigateToStock)
+            StatsGrid(
+                stats = data.stats,
+                onNavigateToStock = onNavigateToStock,
+                onNavigateToMenu = onNavigateToMenu,
+                onNavigateToOrder = onNavigateToOrder,
+                onNavigateToFinance = onNavigateToFinance,
+                onNavigateToStaff = onNavigateToStaff
+            )
         }
         item {
             Text("Pesanan Terkini", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -127,7 +145,14 @@ private fun DashboardContent(
 // ── Stats Grid (Vertical) ──────────────────────────────────────────────────
 
 @Composable
-private fun StatsGrid(stats: DashboardStats, onNavigateToStock: () -> Unit) {
+private fun StatsGrid(
+    stats: DashboardStats,
+    onNavigateToStock: () -> Unit,
+    onNavigateToMenu: () -> Unit,
+    onNavigateToOrder: () -> Unit,
+    onNavigateToFinance: () -> Unit,
+    onNavigateToStaff: () -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatCard(
@@ -169,7 +194,76 @@ private fun StatsGrid(stats: DashboardStats, onNavigateToStock: () -> Unit) {
                 value = stats.menuAktif.toString()
             )
         }
-        CriticalStockCard(count = stats.stokKritis, onClick = onNavigateToStock)
+        // Quick Access & Critical Stock
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Quick Access Grid
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    QuickAccessButton(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.RestaurantMenu,
+                        label = "Menu",
+                        onClick = onNavigateToMenu
+                    )
+                    QuickAccessButton(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.Receipt,
+                        label = "Pesanan",
+                        onClick = onNavigateToOrder
+                    )
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    QuickAccessButton(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.AccountBalanceWallet,
+                        label = "Keuangan",
+                        onClick = onNavigateToFinance
+                    )
+                    QuickAccessButton(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.People,
+                        label = "Staf",
+                        onClick = onNavigateToStaff
+                    )
+                }
+            }
+
+            // Critical Stock occupies the right side
+            CriticalStockCard(
+                modifier = Modifier.weight(1f),
+                count = stats.stokKritis,
+                onClick = onNavigateToStock
+            )
+        }
+    }
+}
+
+@Composable
+private fun QuickAccessButton(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier.height(64.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(2.dp),
+        onClick = onClick
+    ) {
+        Column(
+            Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(icon, null, tint = BrandRed, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.height(4.dp))
+            Text(label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+        }
     }
 }
 
@@ -180,34 +274,34 @@ private fun StatCard(
     label: String, value: String, subtitle: String? = null, isAmount: Boolean = false,
     valueColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
-    Card(modifier = modifier.height(160.dp), shape = RoundedCornerShape(16.dp),
+    Card(modifier = modifier, shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(Modifier.size(40.dp).clip(CircleShape).background(iconBg), Alignment.Center) {
-                Icon(icon, null, tint = iconTint, modifier = Modifier.size(20.dp))
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(Modifier.size(32.dp).clip(CircleShape).background(iconBg), Alignment.Center) {
+                Icon(icon, null, tint = iconTint, modifier = Modifier.size(16.dp))
             }
             Text(label, style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(value, style = if (isAmount) MaterialTheme.typography.titleMedium
-                else MaterialTheme.typography.headlineMedium,
+                else MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 color = valueColor)
             if (subtitle != null) {
-                Text(subtitle, style = MaterialTheme.typography.labelSmall,
+                Text(subtitle, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
-                Spacer(Modifier.height(16.dp)) // Maintain height if no subtitle
+                Spacer(Modifier.height(14.dp)) // Maintain height if no subtitle
             }
         }
     }
 }
 
 @Composable
-private fun CriticalStockCard(count: Int, onClick: () -> Unit) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+private fun CriticalStockCard(modifier: Modifier = Modifier, count: Int, onClick: () -> Unit) {
+    Card(modifier = modifier.height(136.dp), shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = androidx.compose.foundation.BorderStroke(2.dp, BrandRed),
+        border = androidx.compose.foundation.BorderStroke(1.dp, BrandRed),
         elevation = CardDefaults.cardElevation(2.dp)) {
         
         // Background decoration like in web
@@ -216,25 +310,25 @@ private fun CriticalStockCard(count: Int, onClick: () -> Unit) {
             Box(
                 Modifier
                     .align(Alignment.TopEnd)
-                    .size(100.dp)
-                    .offset(x = 20.dp, y = (-20).dp)
+                    .size(80.dp)
+                    .offset(x = 16.dp, y = (-16).dp)
                     .clip(CircleShape)
                     .background(BrandRedBg.copy(alpha = 0.5f))
             )
             
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(Modifier.size(40.dp).clip(CircleShape).background(BrandRedBg), Alignment.Center) {
-                    Icon(Icons.Default.Warning, null, tint = BrandRed, modifier = Modifier.size(20.dp))
+            Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.SpaceBetween) {
+                Box(Modifier.size(28.dp).clip(CircleShape).background(BrandRedBg), Alignment.Center) {
+                    Icon(Icons.Default.Warning, null, tint = BrandRed, modifier = Modifier.size(14.dp))
                 }
-                Text("Bahan Stok Rendah", style = MaterialTheme.typography.labelMedium,
+                Text("Bahan Stok Rendah", style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold, color = BrandRed, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(count.toString(), style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold, color = BrandRed)
-                Text(count.toString(), style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold, color = BrandRed)
-                Button(onClick = onClick, modifier = Modifier.width(140.dp),
+                Button(onClick = onClick, modifier = Modifier.fillMaxWidth().height(32.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = BrandRed),
                     shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(vertical = 8.dp)) {
-                    Text("Cek Stok →", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    contentPadding = PaddingValues(0.dp)) {
+                    Text("Cek Stok →", style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp), fontWeight = FontWeight.Bold)
                 }
             }
         }

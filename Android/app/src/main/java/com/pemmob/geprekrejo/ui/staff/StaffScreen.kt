@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pemmob.geprekrejo.data.model.ActiveStaffItem
 import com.pemmob.geprekrejo.data.model.ShiftItem
@@ -56,7 +57,13 @@ fun StaffScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Manajemen Staf & Shift", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        text = "Manajemen Staf & Shift",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onOpenDrawer) {
                         Icon(Icons.Default.Menu, "Menu")
@@ -75,9 +82,9 @@ fun StaffScreen(
         Column(Modifier.padding(pad)) {
             TabRow(selectedTabIndex = selectedTab) {
                 Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 },
-                    text = { Text("Daftar Staf") })
+                    text = { Text("Daftar Staf", fontSize = 14.sp) })
                 Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 },
-                    text = { Text("Jadwal Shift") })
+                    text = { Text("Jadwal Shift", fontSize = 14.sp) })
             }
 
             when (selectedTab) {
@@ -115,18 +122,11 @@ fun StaffScreen(
 @Composable
 private fun StaffTabContent(state: StaffUiState, searchQuery: String, viewModel: StaffViewModel) {
     Column {
-        OutlinedTextField(
-            value = searchQuery, onValueChange = viewModel::onSearchChanged,
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            placeholder = { Text("Cari nama atau email...") },
-            leadingIcon = { Icon(Icons.Default.Search, null) },
-            trailingIcon = {
-                if (searchQuery.isNotBlank())
-                    IconButton(onClick = { viewModel.onSearchChanged("") }) {
-                        Icon(Icons.Default.Close, null)
-                    }
-            },
-            singleLine = true, shape = RoundedCornerShape(12.dp)
+        com.pemmob.geprekrejo.ui.components.CustomSearchBar(
+            value = searchQuery,
+            onValueChange = viewModel::onSearchChanged,
+            placeholder = "Cari nama atau email...",
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)
         )
 
         if (state.isStaffLoading) {

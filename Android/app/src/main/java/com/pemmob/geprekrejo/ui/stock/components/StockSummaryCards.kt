@@ -76,7 +76,7 @@ fun StockSummaryCards(
             iconBg = BrandRed.copy(alpha = 0.15f),
             titleColor = BrandRed,
             borderColor = if (lowCount > 0) BrandRed.copy(alpha = 0.6f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-            containerColor = if (lowCount > 0) BrandRed.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surface
+            containerColor = if (lowCount > 0) Color(0xFFFDE8E8) else MaterialTheme.colorScheme.surface
         )
     }
 }
@@ -94,9 +94,9 @@ private fun SummaryCard(
 ) {
     Card(
         modifier = Modifier
-            .width(170.dp)
-            .height(95.dp),
-        shape = RoundedCornerShape(14.dp),
+            .width(135.dp)
+            .height(72.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = BorderStroke(1.dp, borderColor)
@@ -104,22 +104,22 @@ private fun SummaryCard(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(14.dp),
+                .padding(10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(verticalArrangement = Arrangement.Center) {
                 Text(
                     text = title,
-                    fontSize = 11.sp,
+                    fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
                     color = titleColor,
                     letterSpacing = 0.5.sp
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = count,
-                    fontSize = 24.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = if (title == "STOK RENDAH" && count != "0") BrandRed else MaterialTheme.colorScheme.onSurface
                 )
@@ -127,7 +127,7 @@ private fun SummaryCard(
 
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(32.dp)
                     .clip(CircleShape)
                     .background(iconBg),
                 contentAlignment = Alignment.Center
@@ -136,7 +136,7 @@ private fun SummaryCard(
                     imageVector = icon,
                     contentDescription = null,
                     tint = iconTint,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }

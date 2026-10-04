@@ -68,14 +68,11 @@ fun FinanceScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text("Keuangan & Laporan", fontWeight = FontWeight.Bold)
-                        Text(
-                            if (state.selectedTab == 0) "Laporan Laba / Rugi Toko" else "Pencatatan Biaya Operasional",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Text(
+                        text = "Keuangan & Laporan",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onOpenDrawer) {
@@ -92,11 +89,6 @@ fun FinanceScreen(
                         }) {
                             Icon(Icons.Default.Print, "Cetak PDF")
                         }
-                    }
-                    IconButton(onClick = {
-                        if (state.selectedTab == 0) viewModel.loadReport() else viewModel.loadExpenses()
-                    }) {
-                        Icon(Icons.Default.Refresh, "Segarkan")
                     }
                 }
             )
@@ -127,14 +119,12 @@ fun FinanceScreen(
                 Tab(
                     selected = state.selectedTab == 0,
                     onClick = { viewModel.selectTab(0) },
-                    text = { Text("Laba / Rugi", fontWeight = FontWeight.SemiBold) },
-                    icon = { Icon(Icons.Default.TrendingUp, null) }
+                    text = { Text("Laba / Rugi", fontWeight = FontWeight.SemiBold, fontSize = 14.sp) }
                 )
                 Tab(
                     selected = state.selectedTab == 1,
                     onClick = { viewModel.selectTab(1) },
-                    text = { Text("Pengeluaran", fontWeight = FontWeight.SemiBold) },
-                    icon = { Icon(Icons.Default.ReceiptLong, null) }
+                    text = { Text("Pengeluaran", fontWeight = FontWeight.SemiBold, fontSize = 14.sp) }
                 )
             }
 
@@ -256,7 +246,7 @@ private fun ProfitLossTabContent(
                             modifier = Modifier.weight(1f),
                             title = "HPP Bahan",
                             value = formatRupiah(report.totalHpp),
-                            subtitle = "Modal resep menu",
+                            subtitle = "Dari menu terjual",
                             icon = Icons.Default.Inventory2,
                             tint = BrandAmber
                         )
@@ -277,7 +267,7 @@ private fun ProfitLossTabContent(
                             modifier = Modifier.weight(1f),
                             title = "Pengeluaran",
                             value = formatRupiah(report.totalExpenses),
-                            subtitle = "Beban operasional",
+                            subtitle = "Operasional (Non-Bahan)",
                             icon = Icons.Default.Receipt,
                             tint = BrandRed
                         )
@@ -520,7 +510,9 @@ private fun ExpenseTabContent(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -642,7 +634,9 @@ private fun ExpenseCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(Modifier.padding(14.dp)) {
             Row(

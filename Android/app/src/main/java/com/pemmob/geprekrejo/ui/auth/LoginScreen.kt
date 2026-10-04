@@ -31,6 +31,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.pemmob.geprekrejo.R
+import com.pemmob.geprekrejo.ui.theme.BrandRed
 
 @Composable
 fun LoginScreen(
@@ -46,11 +50,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFF1A0A0B), Color(0xFF2D1215), Color(0xFF1A0A0B))
-                )
-            )
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Dekorasi bulatan merah besar di belakang
         Box(
@@ -58,7 +58,7 @@ fun LoginScreen(
                 .size(350.dp)
                 .offset(x = 100.dp, y = (-80).dp)
                 .clip(CircleShape)
-                .background(Color(0xFFBC000A).copy(alpha = 0.15f))
+                .background(BrandRed.copy(alpha = 0.15f))
                 .align(Alignment.TopEnd)
         )
 
@@ -77,28 +77,24 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Logo / Icon
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFFBC000A)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("🍗", fontSize = 40.sp)
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.logo_geprek),
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(160.dp)
+                )
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(16.dp))
 
                 Text(
                     text = "Ayam Geprek Rejo",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = "Panel Administrasi",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
 
                 Spacer(Modifier.height(48.dp))
@@ -114,15 +110,10 @@ fun LoginScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     shape         = RoundedCornerShape(14.dp),
                     colors        = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor   = Color(0xFFBC000A),
-                        focusedLabelColor    = Color(0xFFBC000A),
-                        focusedLeadingIconColor = Color(0xFFBC000A),
-                        cursorColor          = Color(0xFFBC000A),
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                        unfocusedLabelColor  = Color.White.copy(alpha = 0.6f),
-                        unfocusedLeadingIconColor = Color.White.copy(alpha = 0.4f),
-                        focusedTextColor     = Color.White,
-                        unfocusedTextColor   = Color.White
+                        focusedBorderColor   = BrandRed,
+                        focusedLabelColor    = BrandRed,
+                        focusedLeadingIconColor = BrandRed,
+                        cursorColor          = BrandRed,
                     )
                 )
 
@@ -140,7 +131,6 @@ fun LoginScreen(
                             Icon(
                                 if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                 contentDescription = null,
-                                tint = Color.White.copy(alpha = 0.5f)
                             )
                         }
                     },
@@ -149,15 +139,10 @@ fun LoginScreen(
                     singleLine    = true,
                     shape         = RoundedCornerShape(14.dp),
                     colors        = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor   = Color(0xFFBC000A),
-                        focusedLabelColor    = Color(0xFFBC000A),
-                        focusedLeadingIconColor = Color(0xFFBC000A),
-                        cursorColor          = Color(0xFFBC000A),
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                        unfocusedLabelColor  = Color.White.copy(alpha = 0.6f),
-                        unfocusedLeadingIconColor = Color.White.copy(alpha = 0.4f),
-                        focusedTextColor     = Color.White,
-                        unfocusedTextColor   = Color.White
+                        focusedBorderColor   = BrandRed,
+                        focusedLabelColor    = BrandRed,
+                        focusedLeadingIconColor = BrandRed,
+                        cursorColor          = BrandRed,
                     )
                 )
 
@@ -165,7 +150,7 @@ fun LoginScreen(
                 AnimatedVisibility(visible = state.error != null) {
                     Text(
                         text      = state.error ?: "",
-                        color     = Color(0xFFFF6B6B),
+                        color     = MaterialTheme.colorScheme.error,
                         style     = MaterialTheme.typography.bodySmall,
                         textAlign = TextAlign.Center,
                         modifier  = Modifier.padding(top = 8.dp)
@@ -183,7 +168,7 @@ fun LoginScreen(
                     enabled  = !state.isLoading,
                     shape    = RoundedCornerShape(14.dp),
                     colors   = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFBC000A),
+                        containerColor = BrandRed,
                         contentColor   = Color.White
                     )
                 ) {

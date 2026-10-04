@@ -31,6 +31,7 @@ import com.pemmob.geprekrejo.ui.theme.BrandRed
  * - Grid 2 kolom kartu menu (Card) dengan foto, badge, nama, harga, dan tombol aksi.
  * - Dialog konfirmasi hapus menu.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuListScreen(
     viewModel: MenuViewModel,
@@ -54,6 +55,25 @@ fun MenuListScreen(
     }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Menu Makanan",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
@@ -71,34 +91,11 @@ fun MenuListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // ── 1. Header (Judul & Subtitle) ─────────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onOpenDrawer) {
-                    Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onBackground)
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Menu Makanan",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        text = "Kelola daftar menu, harga, dan ketersediaan stok.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                    )
-                }
-            }
-
-            // ── 2. Filter Bar (Search + Dropdown Status + Category Pills) ────────
+            // ── Filter Bar (Search + Dropdown Status + Category Pills) ────────
             CategoryFilterBar(
                 searchQuery = state.searchQuery,
                 onSearchChange = viewModel::onSearchQueryChange,

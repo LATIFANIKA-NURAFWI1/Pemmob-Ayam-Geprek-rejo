@@ -68,49 +68,11 @@ fun CategoryFilterBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Kolom Pencarian (Adaptif Dark & Light)
-            OutlinedTextField(
+            com.pemmob.geprekrejo.ui.components.CustomSearchBar(
                 value = searchQuery,
                 onValueChange = onSearchChange,
-                placeholder = {
-                    Text(
-                        "Cari nama menu...",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Cari",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { onSearchChange("") }) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = "Hapus teks",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(10.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = BrandRed,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                ),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(56.dp)
+                placeholder = "Cari nama menu...",
+                modifier = Modifier.weight(1f)
             )
 
             // Dropdown Status Filter (Adaptif Dark & Light)
@@ -127,7 +89,7 @@ fun CategoryFilterBar(
                         MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     ),
                     contentPadding = PaddingValues(horizontal = 10.dp),
-                    modifier = Modifier.height(56.dp)
+                    modifier = Modifier.height(48.dp)
                 ) {
                     Text(
                         text = selectedStatus.label,

@@ -127,9 +127,9 @@ fun MainScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Image(
-                            painter = painterResource(id = R.mipmap.ic_launcher),
+                            painter = painterResource(id = R.drawable.logo_geprek),
                             contentDescription = "Logo Geprek Rejo",
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(52.dp)
                         )
                         Column {
                             Text(
@@ -283,17 +283,36 @@ fun MainScreen(
             }
         }
     ) {
-        Scaffold { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = startDest,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
         ) {
             composable("dashboard") {
                 DashboardScreen(
                     viewModel = dashboardViewModel,
                     onNavigateToStock = {
                         navController.navigate("stock") {
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToMenu = {
+                        navController.navigate("menu") {
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToOrder = {
+                        navController.navigate("order") {
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToFinance = {
+                        navController.navigate("finance") {
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToStaff = {
+                        navController.navigate("staff") {
                             launchSingleTop = true
                         }
                     },
@@ -351,7 +370,6 @@ fun MainScreen(
                 )
             }
         }
-    }
     }
 
     if (showLogoutConfirm) {

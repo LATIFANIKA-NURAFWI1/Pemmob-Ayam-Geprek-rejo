@@ -63,11 +63,12 @@ class ProfitLossService
             ? round(($grossProfit / $revenue) * 100, 2)
             : 0.0;
 
-        // ── 2. Total Expenses per kategori ──────────────────────────────────
+        // ── 2. Total Expenses per kategori (Kecuali Bahan Baku karena masuk ke HPP) ──
         $expensesByCategory = Expense::whereBetween('expense_date', [
             Carbon::parse($from)->startOfDay()->toDateString(),
             Carbon::parse($to)->endOfDay()->toDateString(),
         ])
+            ->where('category', '!=', 'bahan_baku')
             ->select('category', DB::raw('COALESCE(SUM(amount), 0) as total'))
             ->groupBy('category')
             ->pluck('total', 'category')
@@ -80,7 +81,9 @@ class ProfitLossService
         $totalExpenses = (float) Expense::whereBetween('expense_date', [
             Carbon::parse($from)->startOfDay()->toDateString(),
             Carbon::parse($to)->endOfDay()->toDateString(),
-        ])->sum('amount');
+        ])
+            ->where('category', '!=', 'bahan_baku')
+            ->sum('amount');
 
         // ── 3. Net Profit ───────────────────────────────────────────────────
         $netProfit    = $grossProfit - $totalExpenses;
@@ -138,6 +141,7 @@ class ProfitLossService
             Carbon::parse($from)->toDateString(),
             Carbon::parse($to)->toDateString(),
         ])
+            ->where('category', '!=', 'bahan_baku')
             ->selectRaw('expense_date as date, COALESCE(SUM(amount), 0) as total_expense')
             ->groupBy('expense_date')
             ->pluck('total_expense', 'date')

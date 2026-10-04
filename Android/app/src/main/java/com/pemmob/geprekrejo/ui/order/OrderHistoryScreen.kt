@@ -54,23 +54,15 @@ fun OrderHistoryScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text("Pesanan", fontWeight = FontWeight.Bold)
-                        Text(
-                            "Riwayat transaksi penjualan",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Text(
+                        text = "Pesanan",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onOpenDrawer) {
                         Icon(Icons.Default.Menu, "Menu")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.loadData() }) {
-                        Icon(Icons.Default.Refresh, "Segarkan")
                     }
                 }
             )
@@ -98,14 +90,14 @@ fun OrderHistoryScreen(
                 Tab(
                     selected = state.mode == "harian",
                     onClick = { viewModel.setMode("harian") },
-                    text = { Text("Harian", fontWeight = FontWeight.Bold) },
+                    text = { Text("Harian", fontWeight = FontWeight.Bold, fontSize = 14.sp) },
                     selectedContentColor = BrandRed,
                     unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Tab(
                     selected = state.mode == "bulanan",
                     onClick = { viewModel.setMode("bulanan") },
-                    text = { Text("Bulanan", fontWeight = FontWeight.Bold) },
+                    text = { Text("Bulanan", fontWeight = FontWeight.Bold, fontSize = 14.sp) },
                     selectedContentColor = BrandRed,
                     unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -115,16 +107,16 @@ fun OrderHistoryScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Date picker
-                OutlinedCard(
+                Surface(
                     onClick = {
                         val cal = Calendar.getInstance()
                         val isHarian = state.mode == "harian"
-                        
+
                         if (isHarian) {
                             val parts = state.tanggal.split("-")
                             if (parts.size == 3) {
@@ -141,7 +133,6 @@ fun OrderHistoryScreen(
                                 cal.get(Calendar.DAY_OF_MONTH)
                             ).show()
                         } else {
-                            // Simple workaround for month picker: just use date picker but take y-m
                             val parts = state.bulan.split("-")
                             if (parts.size == 2) {
                                 cal.set(parts[0].toInt(), parts[1].toInt() - 1, 1)
@@ -158,26 +149,26 @@ fun OrderHistoryScreen(
                             ).show()
                         }
                     },
-                    modifier = Modifier.weight(1f).height(56.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.weight(1f).height(48.dp)
                 ) {
                     Row(
                         Modifier.padding(horizontal = 12.dp).fillMaxHeight(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(if (state.mode == "harian") state.tanggal else state.bulan)
-                        Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Text(if (state.mode == "harian") state.tanggal else state.bulan, style = MaterialTheme.typography.bodyMedium)
+                        Icon(Icons.Default.CalendarToday, contentDescription = null, tint = BrandRed, modifier = Modifier.size(18.dp))
                     }
                 }
 
-                OutlinedTextField(
+                com.pemmob.geprekrejo.ui.components.CustomSearchBar(
                     value = state.search,
                     onValueChange = viewModel::setSearch,
-                    placeholder = { Text("Cari nomor pesanan...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    modifier = Modifier.weight(1.5f).height(56.dp),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
+                    placeholder = "Cari nomor pesanan...",
+                    modifier = Modifier.weight(1.5f)
                 )
             }
 
@@ -186,25 +177,27 @@ fun OrderHistoryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 SummaryCard(
                     modifier = Modifier.weight(1f),
                     title = "PENDAPATAN",
                     value = formatRupiah(state.data?.totalRevenue ?: 0.0),
                     icon = Icons.Default.Payments,
-                    iconTint = BrandRed
+                    iconTint = BrandRed,
+                    containerColor = BrandRed.copy(alpha = 0.03f)
                 )
                 SummaryCard(
                     modifier = Modifier.weight(1f),
                     title = "TOTAL PESANAN",
                     value = (state.data?.totalOrders ?: 0).toString(),
                     icon = Icons.Default.ReceiptLong,
-                    iconTint = Color.DarkGray
+                    iconTint = BrandBlue,
+                    containerColor = BrandBlue.copy(alpha = 0.03f)
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             // List
             if (state.isLoading) {
@@ -256,21 +249,29 @@ fun SummaryCard(
     title: String,
     value: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    iconTint: Color
+    iconTint: Color,
+    containerColor: Color
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, iconTint.copy(alpha = 0.2f)),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Box(
+                    modifier = Modifier.size(28.dp).clip(CircleShape).background(iconTint.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(16.dp))
+                }
+                Spacer(Modifier.width(6.dp))
+                Text(title, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = iconTint)
             }
             Spacer(Modifier.height(8.dp))
-            Text(value, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = iconTint.takeIf { iconTint == BrandRed } ?: MaterialTheme.colorScheme.onSurface)
+            Text(value, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
@@ -301,7 +302,7 @@ fun OrderItemCard(order: OrderData) {
                 )
             }
             Spacer(Modifier.width(12.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(order.orderNumber, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Text(
@@ -332,14 +333,14 @@ fun OrderItemCard(order: OrderData) {
                     fontSize = 14.sp
                 )
                 Spacer(Modifier.height(4.dp))
-                
+
                 val statusColor = when (order.status) {
                     "completed" -> BrandGreen
                     "confirmed" -> BrandBlue
                     "preparing" -> BrandAmber
                     else -> Color.Gray
                 }
-                
+
                 val statusText = when (order.status) {
                     "completed" -> "Selesai"
                     "confirmed" -> "Dikonfirmasi"
@@ -348,7 +349,7 @@ fun OrderItemCard(order: OrderData) {
                     "cancelled" -> "Batal"
                     else -> order.status
                 }
-                
+
                 Surface(
                     color = statusColor.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(4.dp),
@@ -361,7 +362,7 @@ fun OrderItemCard(order: OrderData) {
                         fontWeight = FontWeight.Bold
                     )
                 }
-                
+
                 Spacer(Modifier.height(4.dp))
                 // Time (extract HH:mm from YYYY-MM-DD HH:mm:ss if possible)
                 val timeStr = try {
@@ -392,22 +393,35 @@ fun DailySummaryCard(daily: DailySummary) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(daily.tanggal, fontWeight = FontWeight.Bold)
-                Text("${daily.totalPesanan} Pesanan (${daily.terbayar} Terbayar)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Box(
+                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(BrandRed.copy(alpha = 0.08f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.EventNote, contentDescription = null, tint = BrandRed, modifier = Modifier.size(24.dp))
             }
-            Text(
-                text = formatRupiah(daily.revenue),
-                fontWeight = FontWeight.Bold,
-                color = BrandRed
-            )
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(daily.tanggal, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(Modifier.height(4.dp))
+                Text("${daily.totalPesanan} Pesanan • ${daily.terbayar} Terbayar", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = formatRupiah(daily.revenue),
+                    fontWeight = FontWeight.ExtraBold,
+                    color = BrandRed,
+                    fontSize = 15.sp
+                )
+                Spacer(Modifier.height(4.dp))
+                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(16.dp))
+            }
         }
     }
 }

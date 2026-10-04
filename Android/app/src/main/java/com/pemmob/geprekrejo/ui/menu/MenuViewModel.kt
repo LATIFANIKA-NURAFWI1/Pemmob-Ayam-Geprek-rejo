@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.pemmob.geprekrejo.data.model.CategoryItem
 import com.pemmob.geprekrejo.data.model.MenuItem
 import com.pemmob.geprekrejo.data.model.MenuStatusFilter
+import com.pemmob.geprekrejo.network.RetrofitClient
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -53,78 +54,22 @@ class MenuViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            // Contoh data inisial sesuai screenshot & database
-            val mockCategories = listOf(
-                CategoryItem(1, "Paket Nasi"),
-                CategoryItem(2, "Ayam"),
-                CategoryItem(3, "Minuman"),
-                CategoryItem(4, "Ekstra")
-            )
-
-            val mockMenus = listOf(
-                MenuItem(
-                    id = 1,
-                    categoryId = 1,
-                    name = "Paket Nasi Geprek Dada",
-                    description = "Ayam geprek bagian dada renyah dengan nasi pulen hangat dan sambal khas Rejo.",
-                    price = 12000.0,
-                    isAvailable = true,
-                    category = mockCategories[0],
-                    image = "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&q=80"
-                ),
-                MenuItem(
-                    id = 2,
-                    categoryId = 1,
-                    name = "Paket Nasi Geprek Paha Atas",
-                    description = "Ayam geprek paha atas juicy dipadukan dengan nasi putih dan lalapan segar.",
-                    price = 12000.0,
-                    isAvailable = true,
-                    category = mockCategories[0],
-                    image = "https://images.unsplash.com/photo-1562967914-608f82629710?w=600&q=80"
-                ),
-                MenuItem(
-                    id = 3,
-                    categoryId = 1,
-                    name = "Paket Nasi Geprek Paha Bawah",
-                    description = "Paket hemat paha bawah krispi dengan sambal korek pilihan.",
-                    price = 10000.0,
-                    isAvailable = true,
-                    category = mockCategories[0],
-                    image = "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=600&q=80"
-                ),
-                MenuItem(
-                    id = 4,
-                    categoryId = 1,
-                    name = "Paket Nasi Geprek Sayap",
-                    description = "Paket renyah sayap ayam berselimut tepung rempah istimewa.",
-                    price = 10000.0,
-                    isAvailable = false,
-                    category = mockCategories[0],
-                    image = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80"
-                ),
-                MenuItem(
-                    id = 5,
-                    categoryId = 4,
-                    name = "Ati Ampela Crispy",
-                    description = "Ati ampela goreng bumbu gurih yang dipadukan dengan sambal geprek pedas nikmat.",
-                    price = 5000.0,
-                    isAvailable = true,
-                    category = mockCategories[3],
-                    image = "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&q=80"
-                )
-            )
-
-            if (_uiState.value.items.isNotEmpty()) {
-                _uiState.update { it.copy(isLoading = false) }
-                return@launch
-            }
-
-            _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    items = mockMenus,
-                    categories = mockCategories
-                )
+            try {
+                val response = RetrofitClient.apiService.getMenuList()
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val body = response.body()!!
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            items = body.data.items,
+                            categories = body.data.categories
+                        )
+                    }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Gagal memuat daftar menu") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.localizedMessage ?: "Terjadi kesalahan koneksi") }
             }
         }
     }

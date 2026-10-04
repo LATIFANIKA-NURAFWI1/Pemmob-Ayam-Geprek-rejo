@@ -41,3 +41,13 @@ data class MenuRequest(
     @SerializedName("category_id") val categoryId: Int,
     @SerializedName("is_available") val isAvailable: Boolean
 )
+
+data class MenuListResponse(
+    val success: Boolean,
+    val data: MenuListData
+)
+
+data class MenuListData(
+    val categories: List<CategoryItem>,
+    val items: List<MenuItem>
+)

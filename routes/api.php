@@ -138,6 +138,12 @@ Route::prefix('v1')->group(function () {
                     ->name('destroy');        // DELETE /api/v1/admin/expenses/{id}
             });
 
+            // ── Menu Makanan ──────────────────────────────────────────────────────────
+            Route::prefix('menu')->name('menu.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Api\Admin\MenuController::class, 'index'])
+                    ->name('index');         // GET /api/v1/admin/menu
+            });
+
             // ── Riwayat Pesanan ──────────────────────────────────────────────────
             Route::get('/order-history', [\App\Http\Controllers\Api\Admin\OrderHistoryController::class, 'index'])
                 ->name('order-history');     // GET /api/v1/admin/order-history

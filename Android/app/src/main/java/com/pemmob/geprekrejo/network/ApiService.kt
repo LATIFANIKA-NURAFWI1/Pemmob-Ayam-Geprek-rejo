@@ -118,4 +118,7 @@ interface ApiService {
         @Query("bulan") bulan: String? = null,
         @Query("page") page: Int = 1
     ): Response<com.pemmob.geprekrejo.data.model.OrderHistoryResponse>
+    // ── Menu Makanan ──────────────────────────────────────────────────────────
+    @GET("admin/menu")
+    suspend fun getMenuList(): Response<MenuListResponse>
 }

@@ -115,8 +115,12 @@ Route::prefix('v1')->group(function () {
             });
 
             // ── Stok Bahan Baku ───────────────────────────────────────────────
-            Route::get('/stock', [StockController::class, 'index'])
-                ->name('stock.index');       // GET /api/v1/admin/stock
+            Route::prefix('stock')->name('stock.')->group(function () {
+                Route::get('/', [StockController::class, 'index'])->name('index');
+                Route::post('/', [StockController::class, 'store'])->name('store');
+                Route::put('/{id}', [StockController::class, 'update'])->name('update');
+                Route::delete('/{id}', [StockController::class, 'destroy'])->name('destroy');
+            });
 
             // ── Laporan Finansial (Laba / Rugi) ──────────────────────────────
             Route::prefix('reports')->name('reports.')->group(function () {

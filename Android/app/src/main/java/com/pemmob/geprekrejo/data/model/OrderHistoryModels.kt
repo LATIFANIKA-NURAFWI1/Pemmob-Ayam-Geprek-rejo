@@ -43,6 +43,10 @@ data class MemberData(
 
 data class OrderDetailData(
     @SerializedName("id") val id: Int,
+    @SerializedName("menu_item_name") val menuItemName: String?,
+    @SerializedName("quantity") val quantity: Int,
+    @SerializedName("unit_price") val unitPrice: Double,
+    @SerializedName("subtotal") val subtotal: Double,
     @SerializedName("menu_item") val menuItem: MenuItem?
 )
 

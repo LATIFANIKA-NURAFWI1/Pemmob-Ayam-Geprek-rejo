@@ -70,7 +70,7 @@ class StockViewModel(private val apiService: ApiService? = null) : ViewModel() {
         loadStock()
     }
 
-    fun loadStock() {
+    fun loadStock(forceRefresh: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
@@ -92,8 +92,8 @@ class StockViewModel(private val apiService: ApiService? = null) : ViewModel() {
                 }
             }
 
-            // Jika data di memori sudah ada, pertahankan agar tidak tertimpa
-            if (_uiState.value.items.isNotEmpty()) {
+            // Jika data di memori sudah ada dan forceRefresh false, pertahankan agar tidak tertimpa
+            if (!forceRefresh && _uiState.value.items.isNotEmpty()) {
                 _uiState.update { it.copy(isLoading = false) }
                 return@launch
             }
@@ -153,51 +153,49 @@ class StockViewModel(private val apiService: ApiService? = null) : ViewModel() {
         currentStock: Double,
         minimumStock: Double
     ) {
-        val currentList = _uiState.value.items.toMutableList()
-        val editing = _uiState.value.editingItem
-        val isLow = currentStock < minimumStock
-
-        if (editing != null) {
-            // Mode Edit
-            val index = currentList.indexOfFirst { it.id == editing.id }
-            if (index != -1) {
-                currentList[index] = editing.copy(
-                    name = name.trim(),
-                    unit = unit.trim(),
-                    unitCost = unitCost,
-                    currentStock = currentStock,
-                    minimumStock = minimumStock,
-                    isCritical = isLow
-                )
-                _uiState.update {
-                    it.copy(
-                        items = currentList,
-                        isFormOpen = false,
-                        editingItem = null,
-                        userMessage = "Bahan '${name.trim()}' berhasil diperbarui."
-                    )
-                }
-            }
-        } else {
-            // Mode Tambah Bahan Baru
-            val newId = (currentList.maxOfOrNull { it.id } ?: 0) + 1
-            val newItem = StockItem(
-                id = newId,
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val editing = _uiState.value.editingItem
+            val request = com.pemmob.geprekrejo.data.model.StockRequest(
                 name = name.trim(),
                 unit = unit.trim(),
-                unitCost = unitCost,
                 currentStock = currentStock,
                 minimumStock = minimumStock,
-                isCritical = isLow
+                unitCost = unitCost
             )
-            currentList.add(0, newItem)
-            _uiState.update {
-                it.copy(
-                    items = currentList,
-                    isFormOpen = false,
-                    editingItem = null,
-                    userMessage = "Bahan baru '${newItem.name}' berhasil ditambahkan."
-                )
+
+            try {
+                if (editing != null && apiService != null) {
+                    val response = apiService.updateStock(editing.id, request)
+                    if (response.isSuccessful) {
+                        _uiState.update {
+                            it.copy(
+                                isFormOpen = false,
+                                editingItem = null,
+                                userMessage = "Bahan '${name.trim()}' berhasil diperbarui."
+                            )
+                        }
+                        loadStock(forceRefresh = true)
+                    } else {
+                        _uiState.update { it.copy(isLoading = false, error = "Gagal memperbarui") }
+                    }
+                } else if (apiService != null) {
+                    val response = apiService.createStock(request)
+                    if (response.isSuccessful) {
+                        _uiState.update {
+                            it.copy(
+                                isFormOpen = false,
+                                editingItem = null,
+                                userMessage = "Bahan '${name.trim()}' berhasil ditambahkan."
+                            )
+                        }
+                        loadStock(forceRefresh = true)
+                    } else {
+                        _uiState.update { it.copy(isLoading = false, error = "Gagal menambah stok") }
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
@@ -211,42 +209,63 @@ class StockViewModel(private val apiService: ApiService? = null) : ViewModel() {
         _uiState.update { it.copy(isRestockOpen = false, restockTarget = null) }
     }
 
-    /**
-     * Menambahkan stok bahan baku secara otomatis
-     * dan memperbarui status kritis/aman secara instan
-     */
     fun applyRestock(addedQty: Double) {
         val target = _uiState.value.restockTarget ?: return
-        val currentList = _uiState.value.items.toMutableList()
-        val index = currentList.indexOfFirst { it.id == target.id }
+        val updatedStock = (target.currentStock + addedQty).coerceAtLeast(0.0)
 
-        if (index != -1) {
-            val updatedStock = (target.currentStock + addedQty).coerceAtLeast(0.0)
-            val isLow = updatedStock < target.minimumStock
-            currentList[index] = target.copy(
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val request = com.pemmob.geprekrejo.data.model.StockRequest(
+                name = target.name,
+                unit = target.unit,
                 currentStock = updatedStock,
-                isCritical = isLow
+                minimumStock = target.minimumStock,
+                unitCost = target.unitCost
             )
 
-            _uiState.update {
-                it.copy(
-                    items = currentList,
-                    isRestockOpen = false,
-                    restockTarget = null,
-                    userMessage = "Stok '${target.name}' bertambah $addedQty ${target.unit}. Total sekarang: $updatedStock ${target.unit}."
-                )
+            try {
+                if (apiService != null) {
+                    val response = apiService.updateStock(target.id, request)
+                    if (response.isSuccessful) {
+                        _uiState.update {
+                            it.copy(
+                                isRestockOpen = false,
+                                restockTarget = null,
+                                userMessage = "Stok '${target.name}' bertambah $addedQty ${target.unit}."
+                            )
+                        }
+                        loadStock(forceRefresh = true)
+                    } else {
+                        _uiState.update { it.copy(isLoading = false, error = "Gagal restock") }
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
 
     // ── Logika Hapus Bahan ───────────────────────────────────────────────────
     fun deleteIngredient(item: StockItem) {
-        val currentList = _uiState.value.items.filter { it.id != item.id }
-        _uiState.update {
-            it.copy(
-                items = currentList,
-                userMessage = "Bahan '${item.name}' berhasil dihapus."
-            )
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                if (apiService != null) {
+                    val response = apiService.deleteStock(item.id)
+                    if (response.isSuccessful) {
+                        _uiState.update {
+                            it.copy(
+                                userMessage = "Bahan '${item.name}' berhasil dihapus."
+                            )
+                        }
+                        loadStock(forceRefresh = true)
+                    } else {
+                        _uiState.update { it.copy(isLoading = false, error = "Gagal menghapus stok") }
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
         }
     }
 

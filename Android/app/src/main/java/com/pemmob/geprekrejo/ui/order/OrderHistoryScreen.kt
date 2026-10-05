@@ -1,7 +1,9 @@
 package com.pemmob.geprekrejo.ui.order
 
 import android.app.DatePickerDialog
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -233,7 +235,10 @@ fun OrderHistoryScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(summary) { daily ->
-                                DailySummaryCard(daily)
+                                DailySummaryCard(daily, onClick = {
+                                    viewModel.setTanggal(daily.tanggal)
+                                    viewModel.setMode("harian")
+                                })
                             }
                         }
                     }
@@ -278,11 +283,16 @@ fun SummaryCard(
 
 @Composable
 fun OrderItemCard(order: OrderData) {
+    var expanded by remember { mutableStateOf(false) }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
+        Column {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -385,13 +395,50 @@ fun OrderItemCard(order: OrderData) {
                 Text(timeStr, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
+
+        AnimatedVisibility(visible = expanded) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Detail Pesanan", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+
+                    if (order.details.isEmpty()) {
+                        Text("Tidak ada detail", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    } else {
+                        order.details.forEach { detail ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Row(modifier = Modifier.weight(1f)) {
+                                    Text("${detail.quantity}x", fontWeight = FontWeight.Bold, color = BrandRed, style = MaterialTheme.typography.bodySmall)
+                                    Spacer(Modifier.width(8.dp))
+                                    Column {
+                                        Text(detail.menuItemName ?: detail.menuItem?.name ?: "Unknown", style = MaterialTheme.typography.bodySmall)
+                                        Text(formatRupiah(detail.unitPrice), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
+                                Text(formatRupiah(detail.subtotal), fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      }
     }
 }
 
 @Composable
-fun DailySummaryCard(daily: DailySummary) {
+fun DailySummaryCard(daily: DailySummary, onClick: () -> Unit = {}) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
@@ -419,8 +466,6 @@ fun DailySummaryCard(daily: DailySummary) {
                     color = BrandRed,
                     fontSize = 15.sp
                 )
-                Spacer(Modifier.height(4.dp))
-                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(16.dp))
             }
         }
     }

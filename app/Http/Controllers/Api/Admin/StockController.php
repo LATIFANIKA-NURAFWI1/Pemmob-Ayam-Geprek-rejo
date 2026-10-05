@@ -50,4 +50,55 @@ class StockController extends Controller
             ],
         ]);
     }
+
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'unit'          => 'required|string|max:50',
+            'current_stock' => 'required|numeric|min:0',
+            'minimum_stock' => 'required|numeric|min:0',
+            'unit_cost'     => 'required|numeric|min:0',
+        ]);
+
+        $item = StockIngredient::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bahan baku berhasil ditambahkan',
+            'data'    => $item
+        ]);
+    }
+
+    public function update(Request $request, $id): JsonResponse
+    {
+        $item = StockIngredient::findOrFail($id);
+
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'unit'          => 'required|string|max:50',
+            'current_stock' => 'required|numeric|min:0',
+            'minimum_stock' => 'required|numeric|min:0',
+            'unit_cost'     => 'required|numeric|min:0',
+        ]);
+
+        $item->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bahan baku berhasil diperbarui',
+            'data'    => $item
+        ]);
+    }
+
+    public function destroy($id): JsonResponse
+    {
+        $item = StockIngredient::findOrFail($id);
+        $item->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bahan baku berhasil dihapus'
+        ]);
+    }
 }

@@ -185,3 +185,11 @@ data class StockListData(
     val total: Int,
     @SerializedName("critical_count") val criticalCount: Int
 )
+
+data class StockRequest(
+    val name: String,
+    val unit: String,
+    @SerializedName("current_stock") val currentStock: Double,
+    @SerializedName("minimum_stock") val minimumStock: Double,
+    @SerializedName("unit_cost")     val unitCost: Double
+)

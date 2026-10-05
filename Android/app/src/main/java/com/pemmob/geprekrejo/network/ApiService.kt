@@ -71,6 +71,15 @@ interface ApiService {
         @Query("search") search: String? = null
     ): Response<ApiResponse<StockListData>>
 
+    @POST("admin/stock")
+    suspend fun createStock(@Body request: StockRequest): Response<ApiResponse<StockItem>>
+
+    @PUT("admin/stock/{id}")
+    suspend fun updateStock(@Path("id") id: Int, @Body request: StockRequest): Response<ApiResponse<StockItem>>
+
+    @DELETE("admin/stock/{id}")
+    suspend fun deleteStock(@Path("id") id: Int): Response<ApiResponse<Unit>>
+
     // ── Laporan Finansial (Laba / Rugi) ───────────────────────────────────────
     @GET("admin/reports/profit-loss")
     suspend fun getProfitLossReport(

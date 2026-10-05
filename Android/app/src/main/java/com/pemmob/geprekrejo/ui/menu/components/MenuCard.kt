@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -45,6 +46,7 @@ import com.pemmob.geprekrejo.util.CurrencyFormatter
 fun MenuCard(
     item: MenuItem,
     onEditClick: (MenuItem) -> Unit,
+    onRecipeClick: (MenuItem) -> Unit,
     onDeleteClick: (MenuItem) -> Unit,
     onToggleStatusClick: (MenuItem) -> Unit,
     modifier: Modifier = Modifier
@@ -197,6 +199,16 @@ fun MenuCard(
                         contentDescription = if (item.isAvailable) "Tandai Habis" else "Tandai Tersedia",
                         tint = if (item.isAvailable) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF4CAF50),
                         onClick = { onToggleStatusClick(item) }
+                    )
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    // Tombol Atur Resep
+                    ActionSquareButton(
+                        icon = Icons.Default.ListAlt,
+                        contentDescription = "Atur Resep",
+                        tint = if (isDark) Color(0xFFFFB74D) else Color(0xFFF57C00),
+                        onClick = { onRecipeClick(item) }
                     )
 
                     Spacer(modifier = Modifier.width(6.dp))

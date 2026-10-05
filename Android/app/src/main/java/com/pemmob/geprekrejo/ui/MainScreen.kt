@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
@@ -50,6 +51,8 @@ import com.pemmob.geprekrejo.ui.menu.MenuFormScreen
 import com.pemmob.geprekrejo.ui.menu.MenuFormViewModel
 import com.pemmob.geprekrejo.ui.menu.MenuListScreen
 import com.pemmob.geprekrejo.ui.menu.MenuViewModel
+import com.pemmob.geprekrejo.ui.menu.RecipeScreen
+import com.pemmob.geprekrejo.ui.menu.RecipeViewModel
 import com.pemmob.geprekrejo.ui.staff.StaffScreen
 import com.pemmob.geprekrejo.ui.staff.StaffViewModel
 import com.pemmob.geprekrejo.ui.stock.StockScreen
@@ -89,7 +92,7 @@ fun MainScreen(
     }
 
     var showLogoutConfirm by remember { mutableStateOf(false) }
-    
+
     val userRole = authRepo.currentUserRole
 
     // Memaksa reload data saat pengguna berhasil login kembali
@@ -286,7 +289,7 @@ fun MainScreen(
         NavHost(
             navController = navController,
             startDestination = startDest,
-            modifier = Modifier
+            modifier = Modifier.fillMaxSize()
         ) {
             composable("dashboard") {
                 DashboardScreen(
@@ -331,7 +334,17 @@ fun MainScreen(
                         menuFormViewModel.initForEdit(item)
                         navController.navigate("menu_form")
                     },
+                    onNavigateToRecipe = { item ->
+                        navController.navigate("recipe/${item.id}")
+                    },
                     onOpenDrawer = { scope.launch { drawerState.open() } }
+                )
+            }
+            composable("recipe/{menuId}") { backStackEntry ->
+                val menuId = backStackEntry.arguments?.getString("menuId")?.toIntOrNull() ?: 0
+                RecipeScreen(
+                    menuId = menuId,
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable("menu_form") {

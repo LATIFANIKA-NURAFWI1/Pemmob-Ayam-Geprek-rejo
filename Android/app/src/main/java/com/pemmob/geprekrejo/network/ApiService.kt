@@ -130,4 +130,26 @@ interface ApiService {
     // ── Menu Makanan ──────────────────────────────────────────────────────────
     @GET("admin/menu")
     suspend fun getMenuList(): Response<MenuListResponse>
+
+    @POST("admin/menu")
+    suspend fun createMenu(@Body request: MenuRequest): Response<MenuSingleResponse>
+
+    @PUT("admin/menu/{id}")
+    suspend fun updateMenu(@Path("id") id: Int, @Body request: MenuRequest): Response<MenuSingleResponse>
+
+    @DELETE("admin/menu/{id}")
+    suspend fun deleteMenu(@Path("id") id: Int): Response<ApiResponse<Unit>>
+
+    @PATCH("admin/menu/{id}/toggle")
+    suspend fun toggleMenuStatus(@Path("id") id: Int): Response<MenuSingleResponse>
+
+    // ── Resep Menu ────────────────────────────────────────────────────────────
+    @GET("admin/menu/{menu_id}/recipes")
+    suspend fun getMenuRecipes(@Path("menu_id") menuId: Int): Response<com.pemmob.geprekrejo.data.model.RecipeResponse>
+
+    @POST("admin/menu/{menu_id}/recipes")
+    suspend fun syncMenuRecipes(
+        @Path("menu_id") menuId: Int,
+        @Body request: com.pemmob.geprekrejo.data.model.RecipeSyncRequest
+    ): Response<com.pemmob.geprekrejo.data.model.ApiResponse<Unit>>
 }

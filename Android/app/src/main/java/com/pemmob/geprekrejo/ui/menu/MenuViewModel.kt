@@ -87,52 +87,57 @@ class MenuViewModel : ViewModel() {
     }
 
     fun toggleAvailability(menuItem: MenuItem) {
-        val updated = _uiState.value.items.map { item ->
-            if (item.id == menuItem.id) item.copy(isAvailable = !item.isAvailable) else item
-        }
-        val statusText = if (!menuItem.isAvailable) "tersedia" else "habis"
-        _uiState.update {
-            it.copy(
-                items = updated,
-                userMessage = "Status menu '${menuItem.name}' diubah menjadi $statusText."
-            )
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.apiService.toggleMenuStatus(menuItem.id)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val updatedMenu = response.body()?.data
+                    if (updatedMenu != null) {
+                        val updated = _uiState.value.items.map { item ->
+                            if (item.id == updatedMenu.id) updatedMenu else item
+                        }
+                        val statusText = if (updatedMenu.isAvailable) "tersedia" else "habis"
+                        _uiState.update {
+                            it.copy(
+                                items = updated,
+                                userMessage = "Status menu '${menuItem.name}' diubah menjadi $statusText."
+                            )
+                        }
+                    }
+                } else {
+                    _uiState.update { it.copy(userMessage = "Gagal mengubah status menu.") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Terjadi kesalahan koneksi.") }
+            }
         }
     }
 
     fun saveMenu(item: MenuItem) {
-        val currentList = _uiState.value.items.toMutableList()
-        val existingIndex = currentList.indexOfFirst { it.id == item.id }
-
-        if (existingIndex != -1 && item.id != 0) {
-            // Mode Edit: Perbarui item yang sudah ada
-            currentList[existingIndex] = item
-            _uiState.update {
-                it.copy(
-                    items = currentList,
-                    userMessage = "Menu '${item.name}' berhasil diperbarui."
-                )
-            }
-        } else {
-            // Mode Tambah Baru: Buat ID baru & letakkan di baris paling atas
-            val newId = (currentList.maxOfOrNull { it.id } ?: 0) + 1
-            val newItem = item.copy(id = newId)
-            currentList.add(0, newItem)
-            _uiState.update {
-                it.copy(
-                    items = currentList,
-                    userMessage = "Menu '${newItem.name}' berhasil ditambahkan."
-                )
-            }
-        }
+        // Karena proses API dilakukan di MenuFormViewModel,
+        // Di sini kita tinggal memuat ulang data dari server.
+        loadData()
+        _uiState.update { it.copy(userMessage = "Menu '${item.name}' berhasil disimpan.") }
     }
 
     fun deleteMenu(menuItem: MenuItem) {
-        val updated = _uiState.value.items.filter { it.id != menuItem.id }
-        _uiState.update {
-            it.copy(
-                items = updated,
-                userMessage = "Menu '${menuItem.name}' berhasil dihapus."
-            )
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.apiService.deleteMenu(menuItem.id)
+                if (response.isSuccessful) {
+                    val updated = _uiState.value.items.filter { it.id != menuItem.id }
+                    _uiState.update {
+                        it.copy(
+                            items = updated,
+                            userMessage = "Menu '${menuItem.name}' berhasil dihapus."
+                        )
+                    }
+                } else {
+                    _uiState.update { it.copy(userMessage = "Gagal menghapus menu.") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(userMessage = "Terjadi kesalahan koneksi.") }
+            }
         }
     }
 

@@ -58,13 +58,35 @@ class MenuFormViewModel : ViewModel() {
     }
 
     private fun loadCategories() {
-        val defaultCategories = listOf(
-            CategoryItem(1, "Paket Nasi"),
-            CategoryItem(2, "Ayam"),
-            CategoryItem(3, "Minuman"),
-            CategoryItem(4, "Ekstra")
-        )
-        _formState.update { it.copy(categories = defaultCategories) }
+        viewModelScope.launch {
+            try {
+                val response = com.pemmob.geprekrejo.network.RetrofitClient.apiService.getMenuList()
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val apiCategories = response.body()!!.data.categories
+                    _formState.update { it.copy(categories = apiCategories) }
+                } else {
+                    // Fallback
+                    val defaultCategories = listOf(
+                        CategoryItem(1, "Paket Nasi"),
+                        CategoryItem(2, "Ayam"),
+                        CategoryItem(3, "Minuman"),
+                        CategoryItem(4, "Camilan"),
+                        CategoryItem(5, "Ekstra")
+                    )
+                    _formState.update { it.copy(categories = defaultCategories) }
+                }
+            } catch (e: Exception) {
+                // Fallback
+                val defaultCategories = listOf(
+                    CategoryItem(1, "Paket Nasi"),
+                    CategoryItem(2, "Ayam"),
+                    CategoryItem(3, "Minuman"),
+                    CategoryItem(4, "Camilan"),
+                    CategoryItem(5, "Ekstra")
+                )
+                _formState.update { it.copy(categories = defaultCategories) }
+            }
+        }
     }
 
     /**
@@ -194,7 +216,7 @@ class MenuFormViewModel : ViewModel() {
     /**
      * Menyimpan data menu baru atau perubahan menu
      */
-    fun submit(onSuccess: (MenuItem) -> Unit) {
+    fun submit(context: android.content.Context, onSuccess: (MenuItem) -> Unit) {
         if (!validate()) return
 
         viewModelScope.launch {
@@ -202,22 +224,58 @@ class MenuFormViewModel : ViewModel() {
 
             try {
                 val current = _formState.value
-                val category = current.categories.find { it.id == current.categoryId }
-                val savedItem = MenuItem(
-                    id = current.menuId ?: 0,
-                    categoryId = current.categoryId,
+                var base64Image: String? = null
+                if (current.imageUri != null) {
+                    try {
+                        val inputStream = context.contentResolver.openInputStream(current.imageUri)
+                        val bytes = inputStream?.readBytes()
+                        inputStream?.close()
+                        if (bytes != null) {
+                            base64Image = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                val request = com.pemmob.geprekrejo.data.model.MenuRequest(
                     name = current.name.trim(),
                     description = current.description.ifBlank { null },
                     price = current.price.toDoubleOrNull() ?: 0.0,
+                    categoryId = current.categoryId ?: 0,
                     isAvailable = current.isAvailable,
-                    image = current.imageUri?.toString() ?: current.existingImageUrl,
-                    category = category
+                    image = base64Image
                 )
 
-                kotlinx.coroutines.delay(400)
+                val response = if (current.isEditMode) {
+                    com.pemmob.geprekrejo.network.RetrofitClient.apiService.updateMenu(current.menuId!!, request)
+                } else {
+                    com.pemmob.geprekrejo.network.RetrofitClient.apiService.createMenu(request)
+                }
 
-                _formState.update { it.copy(isSaving = false, isSuccess = true) }
-                onSuccess(savedItem)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    _formState.update { it.copy(isSaving = false, isSuccess = true) }
+                    response.body()?.data?.let { onSuccess(it) }
+                } else {
+                    var errorMsg = "Gagal menyimpan menu"
+                    try {
+                        val errorBody = response.errorBody()?.string()
+                        if (errorBody != null) {
+                            val jsonObject = org.json.JSONObject(errorBody)
+                            if (jsonObject.has("message")) {
+                                errorMsg = jsonObject.getString("message")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    _formState.update {
+                        it.copy(
+                            isSaving = false,
+                            generalError = errorMsg
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 _formState.update {
                     it.copy(

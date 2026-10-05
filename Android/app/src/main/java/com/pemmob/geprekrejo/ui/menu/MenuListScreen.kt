@@ -37,6 +37,7 @@ fun MenuListScreen(
     viewModel: MenuViewModel,
     onNavigateToAddMenu: () -> Unit,
     onNavigateToEditMenu: (MenuItem) -> Unit,
+    onNavigateToRecipe: (MenuItem) -> Unit,
     onOpenDrawer: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -161,6 +162,7 @@ fun MenuListScreen(
                         MenuCard(
                             item = item,
                             onEditClick = { onNavigateToEditMenu(item) },
+                            onRecipeClick = { onNavigateToRecipe(item) },
                             onDeleteClick = { itemToDelete = item },
                             onToggleStatusClick = { viewModel.toggleAvailability(item) }
                         )

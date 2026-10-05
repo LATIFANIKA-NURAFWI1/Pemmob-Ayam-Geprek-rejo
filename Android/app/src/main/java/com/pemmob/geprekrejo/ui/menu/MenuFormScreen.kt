@@ -4,10 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
@@ -26,12 +24,6 @@ import com.pemmob.geprekrejo.data.model.MenuItem
 import com.pemmob.geprekrejo.ui.menu.components.PhotoUploadSection
 import com.pemmob.geprekrejo.ui.theme.BrandRed
 
-/**
- * Halaman 2: Formulir Tambah / Edit Menu Makanan
- * Menyesuaikan dengan tema (Dark Mode / Light Mode):
- * - Input foto, nama, kategori, harga, deskripsi, switch ketersediaan.
- * - Tombol Batal & Simpan Perubahan.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuFormScreen(
@@ -41,7 +33,7 @@ fun MenuFormScreen(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.formState.collectAsStateWithLifecycle()
-    val scrollState = rememberScrollState()
+    val context = androidx.compose.ui.platform.LocalContext.current
     var categoryDropdownExpanded by remember { mutableStateOf(false) }
 
     val pageTitle = if (state.isEditMode) "Edit Menu" else "Tambah Menu"
@@ -74,46 +66,45 @@ fun MenuFormScreen(
         containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier
     ) { paddingValues ->
-        Column(
+        // Container Card Form Adaptif di luar scroll
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+            ),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .padding(16.dp)
                 .imePadding()
-                .verticalScroll(scrollState)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Container Card Form Adaptif
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                border = BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                ),
-                modifier = Modifier.fillMaxWidth()
+            androidx.compose.foundation.lazy.LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // ── 1. Input Foto Menu ─────────────────────────────────────
+                // ── 1. Input Foto Menu ─────────────────────────────────────
+                item {
                     PhotoUploadSection(
                         imageUri = state.imageUri,
                         existingImageUrl = state.existingImageUrl,
                         onImageSelected = viewModel::onImageSelected,
                         onDeletePhotoClick = viewModel::onDeletePhoto
                     )
+                }
 
+                item {
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
                         thickness = 1.dp
                     )
+                }
 
-                    // ── 2. Nama Menu * ─────────────────────────────────────────
+                // ── 2. Nama Menu * ─────────────────────────────────────────
+                item {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row {
                             Text(
@@ -160,9 +151,10 @@ fun MenuFormScreen(
                             )
                         }
                     }
+                }
 
-                    // ── 3. Kategori * & Harga * ────────────────────────────────
-                    // Kategori
+                // ── 3. Kategori * ──────────────────────────────────────────
+                item {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row {
                             Text(
@@ -242,8 +234,10 @@ fun MenuFormScreen(
                             )
                         }
                     }
+                }
 
-                    // Harga
+                // ── Harga * ─────────────────────────────────────────────
+                item {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row {
                             Text(
@@ -299,8 +293,10 @@ fun MenuFormScreen(
                             )
                         }
                     }
+                }
 
-                    // ── 4. Deskripsi Menu (opsional) ───────────────────────────
+                // ── 4. Deskripsi Menu (opsional) ───────────────────────────
+                item {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             text = "Deskripsi Menu",
@@ -332,8 +328,10 @@ fun MenuFormScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
+                }
 
-                    // ── 5. Toggle Switch "Menu Tersedia" ───────────────────────
+                // ── 5. Toggle Switch "Menu Tersedia" ───────────────────────
+                item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -380,9 +378,11 @@ fun MenuFormScreen(
                             )
                         }
                     }
+                }
 
-                    // Pesan error umum (jika ada)
-                    if (state.generalError != null) {
+                // Pesan error umum
+                if (state.generalError != null) {
+                    item {
                         Text(
                             text = state.generalError!!,
                             style = MaterialTheme.typography.bodySmall,
@@ -390,76 +390,83 @@ fun MenuFormScreen(
                         )
                     }
                 }
-            }
 
-            // ── 6. Tombol Aksi Bawah (Batal & Simpan Perubahan) ────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp, bottom = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Tombol Batal
-                OutlinedButton(
-                    onClick = onNavigateBack,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    border = BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
-                    ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                ) {
-                    Text(
-                        text = "Batal",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp
-                    )
+                // ── 6. Tombol Aksi Bawah (Batal & Simpan Perubahan) ────────────────
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, bottom = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Tombol Batal
+                        OutlinedButton(
+                            onClick = onNavigateBack,
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+                            ),
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = 48.dp)
+                        ) {
+                            Text(
+                                text = "Batal",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp
+                            )
+                        }
+
+                        // Tombol Simpan Perubahan
+                        Button(
+                            onClick = {
+                                viewModel.submit(context = context, onSuccess = onSaveComplete)
+                            },
+                            enabled = !state.isSaving,
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = BrandRed),
+                            modifier = Modifier
+                                .weight(1.5f)
+                                .heightIn(min = 48.dp)
+                        ) {
+                            if (state.isSaving) {
+                                CircularProgressIndicator(
+                                    color = Color.White,
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Menyimpan...",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Save,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Simpan",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    fontSize = 14.sp,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
                 }
 
-                // Tombol Simpan Perubahan
-                Button(
-                    onClick = {
-                        viewModel.submit(onSuccess = onSaveComplete)
-                    },
-                    enabled = !state.isSaving,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandRed),
-                    modifier = Modifier
-                        .weight(1.5f)
-                        .height(48.dp)
-                ) {
-                    if (state.isSaving) {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Menyimpan...",
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Save,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Simpan Perubahan",
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            fontSize = 14.sp
-                        )
-                    }
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }

@@ -142,10 +142,24 @@ Route::prefix('v1')->group(function () {
                     ->name('destroy');        // DELETE /api/v1/admin/expenses/{id}
             });
 
-            // ── Menu Makanan ──────────────────────────────────────────────────────────
+            // ── Menu Makanan & Resep ────────────────────────────────────────────────
             Route::prefix('menu')->name('menu.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Api\Admin\MenuController::class, 'index'])
                     ->name('index');         // GET /api/v1/admin/menu
+                Route::post('/', [\App\Http\Controllers\Api\Admin\MenuController::class, 'store'])
+                    ->name('store');
+                Route::put('/{menu_id}', [\App\Http\Controllers\Api\Admin\MenuController::class, 'update'])
+                    ->name('update');
+                Route::delete('/{menu_id}', [\App\Http\Controllers\Api\Admin\MenuController::class, 'destroy'])
+                    ->name('destroy');
+                Route::patch('/{menu_id}/toggle', [\App\Http\Controllers\Api\Admin\MenuController::class, 'toggle'])
+                    ->name('toggle');
+                    
+                Route::get('/{menu_id}/recipes', [\App\Http\Controllers\Api\Admin\RecipeController::class, 'show'])
+                    ->name('recipes.show');  // GET /api/v1/admin/menu/{id}/recipes
+                    
+                Route::post('/{menu_id}/recipes', [\App\Http\Controllers\Api\Admin\RecipeController::class, 'sync'])
+                    ->name('recipes.sync');  // POST /api/v1/admin/menu/{id}/recipes
             });
 
             // ── Riwayat Pesanan ──────────────────────────────────────────────────
